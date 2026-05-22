@@ -5,38 +5,23 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowUpRight } from "lucide-react"
 
-const services = [
-  {
-    number: "01",
-    title: "Pelvic Health",
-    description:
-      "Pelvic floor therapy, postpartum recovery, incontinence and prolapse support, plus hormonal and intimate health care for every stage of life.",
-    image: "/images/pelvic.png",
-    href: "/services/pelvic-health",
-    treatments: [
-      "Pelvic Floor",
-      "Postpartum",
-      "Incontinence",
-      "Hormonal Support",
-    ],
-  },
-  {
-    number: "02",
-    title: "Medical Aesthetics",
-    description:
-      "Physician-led neuromodulators, dermal fillers, skin tightening, chemical peels, and acne care. Subtle, natural, evidence-based.",
-    image: "/images/medical-aesthetics.png",
-    href: "/services/medical-aesthetics",
-    treatments: [
-      "Botox",
-      "Dermal Fillers",
-      "Skin Tightening",
-      "Chemical Peels",
-    ],
-  },
+import type { HomeServicesContent } from "@/lib/cms/schema"
+
+// Card number and detail-page link are structural — kept in code.
+const serviceMeta = [
+  { number: "01", href: "/services/pelvic-health" },
+  { number: "02", href: "/services/medical-aesthetics" },
 ]
 
-export function Services() {
+export function Services({ content }: { content: HomeServicesContent }) {
+  const services = serviceMeta.map((meta, i) => ({
+    ...meta,
+    title: content.cards[i]?.title ?? "",
+    description: content.cards[i]?.description ?? "",
+    image: content.cards[i]?.image ?? "",
+    treatments: content.cards[i]?.treatments ?? [],
+  }))
+
   return (
     <section id="services" className="bg-warm-cream pb-24 pt-12 sm:pb-32">
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
@@ -50,20 +35,19 @@ export function Services() {
           <div>
             <div className="flex items-center gap-3">
               <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-forest">
-                Services
+                {content.eyebrow}
               </span>
               <span aria-hidden className="h-px w-10 bg-ridge-gold/70" />
             </div>
             <h2 className="mt-5 max-w-[700px] font-serif text-[34px] leading-[1.05] tracking-[-0.01em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-              Two practices.{" "}
-              <span className="italic">One philosophy.</span>
+              {content.heading}
             </h2>
           </div>
           <Link
             href="/services"
             className="group inline-flex shrink-0 items-center gap-2 self-start text-[12px] font-medium uppercase tracking-[0.22em] text-deep-forest transition-all hover:gap-3 sm:self-auto"
           >
-            View all services
+            {content.viewAllLabel}
             <ArrowUpRight size={14} strokeWidth={1.6} />
           </Link>
         </motion.div>
@@ -71,7 +55,7 @@ export function Services() {
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {services.map((service, idx) => (
             <motion.div
-              key={service.title}
+              key={service.number}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}

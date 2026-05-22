@@ -3,6 +3,7 @@ import Link from "next/link"
 import {
   Instagram,
   Facebook,
+  Linkedin,
   Mail,
   MapPin,
   Phone,
@@ -10,6 +11,8 @@ import {
   ShieldCheck,
   Award,
 } from "lucide-react"
+
+import { cmsService } from "@/lib/cms/service"
 
 const quickLinks = [
   { label: "Home", href: "/" },
@@ -26,7 +29,18 @@ const patients = [
   { label: "About Dr. Pickard", href: "/about" },
 ]
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const settings = await cmsService.getSiteSettings()
+  const contact = await cmsService.getPageContent("contact")
+  const description =
+    settings.about?.trim() ||
+    "Surgeon-led pelvic wellness and medical aesthetics, with clinics in Bay Roberts and St. John's, Newfoundland."
+  const phone = settings.contactPhone?.trim() || ""
+  const email = settings.contactEmail?.trim() || ""
+  const socials = (settings.socials ?? {}) as Record<string, string>
+  const clinic1 = contact["clinic1.address"] || "494 Conception Bay Highway, Bay Roberts, NL A0A 1G0"
+  const clinic2 = contact["clinic2.address"] || "100 Elizabeth Avenue, St. John's, NL A1B 1R9"
+
   return (
     <footer className="relative isolate overflow-hidden bg-deep-forest text-warm-cream">
       {/* Forest.png — single backdrop spanning the full footer */}
@@ -200,33 +214,53 @@ export function SiteFooter() {
                 className="-ml-3 h-44 w-auto object-contain brightness-0 invert sm:-ml-4 sm:h-52 lg:h-60"
               />
               <p className="mt-5 max-w-[360px] text-[14px] leading-relaxed text-warm-cream/70">
-                Surgeon-led pelvic wellness and medical aesthetics, with
-                clinics in Bay Roberts and St. John&rsquo;s, Newfoundland.
+                {description}
               </p>
 
               {/* Social */}
               <div className="mt-7 flex items-center gap-3">
-                <a
-                  href="https://instagram.com"
-                  aria-label="Instagram"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-warm-cream/15 text-warm-cream/75 transition-all hover:border-warm-cream/45 hover:text-warm-cream"
-                >
-                  <Instagram size={14} strokeWidth={1.5} />
-                </a>
-                <a
-                  href="https://facebook.com"
-                  aria-label="Facebook"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-warm-cream/15 text-warm-cream/75 transition-all hover:border-warm-cream/45 hover:text-warm-cream"
-                >
-                  <Facebook size={14} strokeWidth={1.5} />
-                </a>
-                <a
-                  href="mailto:spruceridgewellness@gmail.com"
-                  aria-label="Email"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-warm-cream/15 text-warm-cream/75 transition-all hover:border-warm-cream/45 hover:text-warm-cream"
-                >
-                  <Mail size={14} strokeWidth={1.5} />
-                </a>
+                {socials.instagram ? (
+                  <a
+                    href={socials.instagram}
+                    aria-label="Instagram"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-warm-cream/15 text-warm-cream/75 transition-all hover:border-warm-cream/45 hover:text-warm-cream"
+                  >
+                    <Instagram size={14} strokeWidth={1.5} />
+                  </a>
+                ) : null}
+                {socials.facebook ? (
+                  <a
+                    href={socials.facebook}
+                    aria-label="Facebook"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-warm-cream/15 text-warm-cream/75 transition-all hover:border-warm-cream/45 hover:text-warm-cream"
+                  >
+                    <Facebook size={14} strokeWidth={1.5} />
+                  </a>
+                ) : null}
+                {socials.linkedin ? (
+                  <a
+                    href={socials.linkedin}
+                    aria-label="LinkedIn"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-warm-cream/15 text-warm-cream/75 transition-all hover:border-warm-cream/45 hover:text-warm-cream"
+                  >
+                    <Linkedin size={14} strokeWidth={1.5} />
+                  </a>
+                ) : null}
+                {email ? (
+                  <a
+                    href={`mailto:${email}`}
+                    aria-label="Email"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-warm-cream/15 text-warm-cream/75 transition-all hover:border-warm-cream/45 hover:text-warm-cream"
+                  >
+                    <Mail size={14} strokeWidth={1.5} />
+                  </a>
+                ) : null}
               </div>
             </div>
 
@@ -322,9 +356,7 @@ export function SiteFooter() {
                       Bay Roberts
                     </div>
                     <div className="mt-1.5 text-[13px] leading-snug text-warm-cream/70">
-                      494 Conception Bay Highway
-                      <br />
-                      Bay Roberts, NL A0A 1G0
+                      {clinic1}
                     </div>
                   </div>
                 </div>
@@ -343,9 +375,7 @@ export function SiteFooter() {
                       St. John&rsquo;s
                     </div>
                     <div className="mt-1.5 text-[13px] leading-snug text-warm-cream/70">
-                      Bense Clinic
-                      <br />
-                      St. John&rsquo;s, NL
+                      {clinic2}
                     </div>
                   </div>
                 </div>
@@ -353,36 +383,29 @@ export function SiteFooter() {
 
               {/* Shared contact — phone + email stacked, each on its own line */}
               <div className="mt-6 space-y-3 border-t border-warm-cream/10 pt-5">
-                <a
-                  href="tel:7097869150"
-                  className="group flex items-center gap-3"
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-warm-cream/[0.08] ring-1 ring-warm-cream/10">
-                    <Phone
-                      size={14}
-                      strokeWidth={1.5}
-                      className="text-ridge-gold"
-                    />
-                  </div>
-                  <span className="text-[13.5px] tracking-tight text-warm-cream/80 transition-colors group-hover:text-warm-cream">
-                    +1 (709) 786-9150
-                  </span>
-                </a>
-                <a
-                  href="mailto:spruceridgewellness@gmail.com"
-                  className="group flex items-center gap-3"
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-warm-cream/[0.08] ring-1 ring-warm-cream/10">
-                    <Mail
-                      size={14}
-                      strokeWidth={1.5}
-                      className="text-ridge-gold"
-                    />
-                  </div>
-                  <span className="truncate text-[13.5px] tracking-tight text-warm-cream/80 transition-colors group-hover:text-warm-cream">
-                    spruceridgewellness@gmail.com
-                  </span>
-                </a>
+                {phone ? (
+                  <a
+                    href={`tel:${phone.replace(/[^\d+]/g, "")}`}
+                    className="group flex items-center gap-3"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-warm-cream/[0.08] ring-1 ring-warm-cream/10">
+                      <Phone size={14} strokeWidth={1.5} className="text-ridge-gold" />
+                    </div>
+                    <span className="text-[13.5px] tracking-tight text-warm-cream/80 transition-colors group-hover:text-warm-cream">
+                      {phone}
+                    </span>
+                  </a>
+                ) : null}
+                {email ? (
+                  <a href={`mailto:${email}`} className="group flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-warm-cream/[0.08] ring-1 ring-warm-cream/10">
+                      <Mail size={14} strokeWidth={1.5} className="text-ridge-gold" />
+                    </div>
+                    <span className="truncate text-[13.5px] tracking-tight text-warm-cream/80 transition-colors group-hover:text-warm-cream">
+                      {email}
+                    </span>
+                  </a>
+                ) : null}
               </div>
             </div>
           </div>

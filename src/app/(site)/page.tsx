@@ -8,6 +8,7 @@ import { Metrics } from "@/components/wellness/sections/metrics"
 import { Services } from "@/components/wellness/sections/services"
 import { Testimonial } from "@/components/wellness/sections/testimonial"
 import { Differentiation } from "@/components/wellness/sections/differentiation"
+import { cmsService } from "@/lib/cms/service"
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://spruceridgewellness.ca"
@@ -80,7 +81,10 @@ const structuredData = {
   ],
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const content = await cmsService.getHomeContent()
+  const testimonials = await cmsService.listTestimonials()
+
   return (
     <>
       <script
@@ -102,23 +106,23 @@ export default function HomePage() {
       <main className="bg-warm-cream">
         {/* 1. Hook + value preview */}
         <div id="welcome" className="scroll-mt-24">
-          <Hero />
+          <Hero content={content.hero} />
         </div>
         {/* 2. Instant credibility ticker — answers "is this legit?" */}
-        <Marquee />
+        <Marquee items={content.marquee} />
         {/* 3. What you offer — answers "what do you actually do?" (Services already has id="services") */}
-        <Services />
+        <Services content={content.services} />
         {/* 4. Why us + who is behind it */}
         <div id="why" className="scroll-mt-24">
-          <Differentiation />
+          <Differentiation content={content.why} />
         </div>
         {/* 5. Proof in data */}
         <div id="results" className="scroll-mt-24">
-          <Metrics />
+          <Metrics content={content.numbers} />
         </div>
         {/* 6. Proof in voices */}
         <div id="reviews" className="scroll-mt-24">
-          <Testimonial />
+          <Testimonial items={testimonials} content={content.testimonials} />
         </div>
         {/* 7. Closing brand moment lives inside the footer's top hero (id="visit" on the philosophy block) */}
       </main>

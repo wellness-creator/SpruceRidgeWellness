@@ -6,7 +6,9 @@ import { SiteHeader } from "@/components/wellness/layout/site-header"
 import { SiteFooter } from "@/components/wellness/layout/site-footer"
 import { ScrollProgress } from "@/components/wellness/motion/scroll-progress"
 import { SectionNav } from "@/components/wellness/motion/section-nav"
+
 import { Testimonial } from "@/components/wellness/sections/testimonial"
+import { cmsService } from "@/lib/cms/service"
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://spruceridgewellness.ca"
@@ -42,46 +44,19 @@ export const metadata: Metadata = {
   },
 }
 
-const services = [
-  {
-    number: "01",
-    title: "Pelvic Health",
-    href: "/services/pelvic-health",
-    image: "/images/pelvic.png",
-    alt: "Patient receiving non-invasive BTL Emsella pelvic floor treatment at Spruce Ridge Wellness in Newfoundland",
-    eyebrow: "Pelvic Floor · Postpartum · Incontinence",
-    description:
-      "Non-invasive, FRCSC surgeon-led pelvic floor care. The clinical answer to leaks, urgency, and the postpartum questions other clinics rush past.",
-    treatments: [
-      "BTL Emsella",
-      "Postpartum Recovery",
-      "Incontinence Support",
-      "Hormonal & Intimate Health",
-    ],
-  },
-  {
-    number: "02",
-    title: "Medical Aesthetics",
-    href: "/services/medical-aesthetics",
-    image: "/images/medical-aesthetics.png",
-    alt: "Physician performing a precise Botox injection at Spruce Ridge Wellness medical aesthetics clinic",
-    eyebrow: "Botox · Plexr · Skin Care",
-    description:
-      "Physician-led Botox, dermal fillers, Plexr skin tightening, and personalized skin care. Refined results that look like you, only refreshed.",
-    treatments: [
-      "Botox & Neuromodulators",
-      "Dermal Fillers",
-      "Plexr Skin Tightening",
-      "Skin Rejuvenation",
-    ],
-  },
+// Card number and detail-page link are structural — they stay in code while
+// the text and photos come from the CMS.
+const serviceLinks = [
+  { number: "01", href: "/services/pelvic-health" },
+  { number: "02", href: "/services/medical-aesthetics" },
 ]
 
-const trustChips = [
-  "FRCSC Surgeon-Led",
-  "Health Canada Approved",
-  "Bay Roberts · St. John's",
-]
+function splitLines(value: string): string[] {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -133,7 +108,20 @@ function SectionEyebrow({ label }: { label: string }) {
   )
 }
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const home = await cmsService.getHomeContent()
+  const testimonials = await cmsService.listTestimonials()
+  const c = await cmsService.getPageContent("services")
+  const trustChips = splitLines(c["hero.trustChips"] ?? "")
+  const services = serviceLinks.map((link, i) => ({
+    ...link,
+    eyebrow: c[`service${i + 1}.eyebrow`] ?? "",
+    title: c[`service${i + 1}.title`] ?? "",
+    description: c[`service${i + 1}.description`] ?? "",
+    image: c[`service${i + 1}.image`] || "/images/pelvic.png",
+    treatments: splitLines(c[`service${i + 1}.treatments`] ?? ""),
+  }))
+
   return (
     <>
       <script
@@ -160,18 +148,15 @@ export default function ServicesPage() {
           <div className="mx-auto max-w-[1400px]">
             <div className="mb-12 flex flex-col gap-6 sm:mb-16 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <SectionEyebrow label="Our Services" />
+                <SectionEyebrow label={c["hero.eyebrow"] ?? ""} />
                 <h1
                   id="services-headline"
                   className="mt-5 max-w-[760px] font-serif text-[40px] leading-[1.05] tracking-[-0.01em] text-deep-forest sm:text-[52px] lg:text-[64px]"
                 >
-                  Two specialties.{" "}
-                  <span className="italic">One trusted hand.</span>
+                  {c["hero.heading"]}
                 </h1>
                 <p className="mt-6 max-w-[560px] text-[15px] leading-[1.65] text-deep-forest/70 sm:text-[16px]">
-                  Surgeon-led pelvic health and medical aesthetics across two
-                  Newfoundland clinics. Real medicine, calm conversation, and a
-                  plan that fits your life.
+                  {c["hero.intro"]}
                 </p>
                 <ul className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[10.5px] uppercase tracking-[0.22em] text-deep-forest/65">
                   {trustChips.map((chip) => (
@@ -186,12 +171,12 @@ export default function ServicesPage() {
                 </ul>
               </div>
               <a
-                href="https://spruceridgewellness.janeapp.com"
+                href={c["hero.bookUrl"] || "https://spruceridgewellness.janeapp.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex shrink-0 items-center gap-2 self-start text-[12px] font-medium uppercase tracking-[0.22em] text-deep-forest transition-all hover:gap-3 sm:self-auto"
               >
-                Book a Consultation
+                {c["hero.bookLabel"]}
                 <ArrowUpRight size={14} strokeWidth={1.6} />
               </a>
             </div>
@@ -207,7 +192,7 @@ export default function ServicesPage() {
                     <div className="relative aspect-[5/6] w-full overflow-hidden">
                       <Image
                         src={service.image}
-                        alt={service.alt}
+                        alt={service.title}
                         fill
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         className="object-cover transition-transform duration-[1500ms] ease-out group-hover:scale-[1.05]"
@@ -266,7 +251,7 @@ export default function ServicesPage() {
 
         {/* REVIEWS — same testimonial moment as the homepage */}
         <div id="reviews" className="scroll-mt-24">
-          <Testimonial />
+          <Testimonial items={testimonials} content={home.testimonials} />
         </div>
       </main>
 

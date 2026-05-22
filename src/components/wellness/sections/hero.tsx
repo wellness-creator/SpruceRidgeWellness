@@ -4,22 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 
-const treatments = [
-  "Pelvic Floor",
-  "Postpartum Care",
-  "Incontinence Care",
-  "Prolapse Support",
-  "Pain Management",
-  "Botox",
-  "Dermal Fillers",
-  "Skin Tightening",
-  "Skin Rejuvenation",
-  "Chemical Peels",
-  "Acne Treatment",
-  "Scar Reduction",
-  "Hormonal Support",
-  "Intimate Health",
-]
+import type { HomeHeroContent } from "@/lib/cms/schema"
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -32,7 +17,19 @@ const FAN_CENTER_TOP = "108%"
 const ROTATION_PERIOD_S = 120
 const PILL_WIDTH_PX = 140
 
-export function Hero() {
+function renderMultiline(value: string) {
+  const lines = value.split("\n")
+  return lines.map((line, i) => (
+    <span key={i}>
+      {line}
+      {i < lines.length - 1 ? <br className="hidden sm:block" /> : null}
+    </span>
+  ))
+}
+
+export function Hero({ content }: { content: HomeHeroContent }) {
+  const treatments = content.treatments
+
   return (
     <section
       id="home"
@@ -42,8 +39,8 @@ export function Hero() {
         <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px] lg:rounded-[40px]">
           <div className="relative aspect-[4/5] w-full sm:aspect-[16/11] lg:aspect-[16/9]">
             <Image
-              src="/images/hero-pelvic.jpg"
-              alt="Spruce Ridge Wellness — surgeon-led pelvic health and medical aesthetics in Bay Roberts and St. John's, Newfoundland"
+              src={content.image}
+              alt={content.headline.replace(/\n/g, " ")}
               fill
               priority
               sizes="100vw"
@@ -69,8 +66,7 @@ export function Hero() {
                   fontWeight: 400,
                 }}
               >
-                Your body deserves <br className="hidden sm:block" />
-                to feel <span className="italic">strong</span> again.
+                {renderMultiline(content.headline)}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 14 }}
@@ -78,9 +74,7 @@ export function Hero() {
                 transition={{ duration: 1, delay: 0.3, ease }}
                 className="mt-7 max-w-[600px] text-[14px] leading-[1.65] text-warm-cream/90 sm:mt-8 sm:text-[15.5px]"
               >
-                Pelvic health and medical aesthetics. Led by an FRCSC General
-                Surgeon at our Bay Roberts and St. John&apos;s clinics in
-                Newfoundland.
+                {content.subhead}
               </motion.p>
             </div>
 
@@ -102,7 +96,7 @@ export function Hero() {
                 }}
               >
                 {treatments.map((t, i) => {
-                  const positionTheta = (i / treatments.length) * 360
+                  const positionTheta = (i / Math.max(treatments.length, 1)) * 360
                   const positionRad = (positionTheta * Math.PI) / 180
                   const cx = ARC_RADIUS * Math.sin(positionRad)
                   const cy = -ARC_RADIUS * Math.cos(positionRad)
@@ -164,8 +158,8 @@ export function Hero() {
                 />
               </svg>
               <Link
-                href="/contact"
-                aria-label="Explore our treatments at Spruce Ridge Wellness"
+                href={content.ctaHref}
+                aria-label={content.ctaLabel}
                 className="group absolute bottom-2 left-1/2 flex -translate-x-1/2 flex-col items-center origin-bottom transition-transform duration-500 ease-out hover:scale-[1.18]"
               >
                 <Image
@@ -178,7 +172,7 @@ export function Hero() {
                   style={{ height: "clamp(80px, 7vw, 110px)" }}
                 />
                 <span className="mt-1 text-[9.5px] uppercase tracking-[0.22em] text-deep-forest/80 sm:text-[10.5px]">
-                  Explore our treatments
+                  {content.ctaLabel}
                 </span>
               </Link>
             </motion.div>

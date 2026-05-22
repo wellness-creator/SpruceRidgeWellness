@@ -7,6 +7,7 @@ import {
   PromotionsAccordion,
   type Offer,
 } from "@/components/wellness/promotions/promotions-accordion"
+import { cmsService } from "@/lib/cms/service"
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://spruceridgewellness.ca"
@@ -73,76 +74,67 @@ export const metadata: Metadata = {
   },
 }
 
-const offers: Offer[] = [
-  {
-    eyebrow: "First Visits",
-    label: "Emsella Introductory Package",
-    body: "A six-session course on the Emsella chair. The first assessment is unhurried, and new-patient pricing applies. You sit fully clothed; the chair does the work.",
-    image: "/images/pelvic.png",
-    alt: "Pelvic floor care at Spruce Ridge Wellness in Newfoundland",
-    href: "https://spruceridgewellness.janeapp.com",
-  },
-  {
-    eyebrow: "Now Available",
-    label: "Medical Aesthetics Launch",
-    body: "Botox, Plexr, and clinical skin care are now offered at both clinics. The first visit is a conversation, not a treatment.",
-    image: "/images/Botox.png",
-    alt: "Physician-administered Botox treatment at Spruce Ridge Wellness in Newfoundland",
-    href: "https://spruceridgewellness.janeapp.com",
-  },
-]
+export default async function PromotionsPage() {
+  const rows = await cmsService.listCollection("promotions")
+  const offers: Offer[] = rows.map((r) => ({
+    eyebrow: r.eyebrow ?? "",
+    label: r.label ?? "",
+    body: r.body ?? "",
+    image: r.image || "/images/pelvic.png",
+    alt: r.label ?? "",
+    href: r.href || "https://spruceridgewellness.janeapp.com",
+  }))
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebPage",
-      "@id": `${SITE_URL}/promotions#webpage`,
-      url: `${SITE_URL}/promotions`,
-      name: "Current Promotions | Spruce Ridge Wellness",
-      isPartOf: { "@id": `${SITE_URL}/#website` },
-      inLanguage: "en-CA",
-      breadcrumb: { "@id": `${SITE_URL}/promotions#breadcrumbs` },
-    },
-    {
-      "@type": "BreadcrumbList",
-      "@id": `${SITE_URL}/promotions#breadcrumbs`,
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "Promotions",
-          item: `${SITE_URL}/promotions`,
-        },
-      ],
-    },
-    {
-      "@type": "ItemList",
-      "@id": `${SITE_URL}/promotions#offers`,
-      name: "Current promotions at Spruce Ridge Wellness",
-      itemListElement: offers.map((o, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        item: {
-          "@type": "Offer",
-          name: o.label,
-          category: o.eyebrow,
-          description: o.body,
-          url: o.href,
-          availability: "https://schema.org/InStock",
-          areaServed: {
-            "@type": "AdministrativeArea",
-            name: "Newfoundland and Labrador",
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${SITE_URL}/promotions#webpage`,
+        url: `${SITE_URL}/promotions`,
+        name: "Current Promotions | Spruce Ridge Wellness",
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+        inLanguage: "en-CA",
+        breadcrumb: { "@id": `${SITE_URL}/promotions#breadcrumbs` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${SITE_URL}/promotions#breadcrumbs`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Promotions",
+            item: `${SITE_URL}/promotions`,
           },
-          seller: { "@id": `${SITE_URL}/#business` },
-        },
-      })),
-    },
-  ],
-}
+        ],
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${SITE_URL}/promotions#offers`,
+        name: "Current promotions at Spruce Ridge Wellness",
+        itemListElement: offers.map((o, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          item: {
+            "@type": "Offer",
+            name: o.label,
+            category: o.eyebrow,
+            description: o.body,
+            url: o.href,
+            availability: "https://schema.org/InStock",
+            areaServed: {
+              "@type": "AdministrativeArea",
+              name: "Newfoundland and Labrador",
+            },
+            seller: { "@id": `${SITE_URL}/#business` },
+          },
+        })),
+      },
+    ],
+  }
 
-export default function PromotionsPage() {
   return (
     <>
       <script
@@ -163,7 +155,13 @@ export default function PromotionsPage() {
           className="relative scroll-mt-24 overflow-hidden px-4 pt-12 pb-24 sm:px-6 sm:pt-16 sm:pb-32 lg:px-8 lg:pt-20 lg:pb-40"
         >
           <div className="mx-auto max-w-[1320px]">
-            <PromotionsAccordion offers={offers} />
+            {offers.length > 0 ? (
+              <PromotionsAccordion offers={offers} />
+            ) : (
+              <p className="py-20 text-center font-serif text-[24px] text-deep-forest/70">
+                No promotions are running right now — please check back soon.
+              </p>
+            )}
           </div>
         </section>
       </main>

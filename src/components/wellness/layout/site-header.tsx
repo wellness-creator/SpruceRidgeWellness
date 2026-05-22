@@ -45,22 +45,6 @@ export function SiteHeader() {
 
   return (
     <>
-      {/* Announcement strip */}
-      <div className="bg-deep-forest">
-        <div className="mx-auto flex h-9 max-w-[1400px] items-center justify-center gap-3 px-4">
-          <span aria-hidden className="h-1 w-1 rounded-full bg-warm-cream/50" />
-          <Link
-            href="/promotions"
-            className="text-[12px] tracking-tight text-warm-cream/90 transition-colors hover:text-warm-cream"
-          >
-            Now offering Botox &amp; Plexr —{" "}
-            <span className="underline underline-offset-4 decoration-warm-cream/40">
-              Learn more
-            </span>
-          </Link>
-        </div>
-      </div>
-
       <header
         className={`sticky top-0 z-50 transition-all duration-500 ${
           scrolled

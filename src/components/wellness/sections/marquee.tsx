@@ -1,19 +1,6 @@
 "use client"
 
-const items = [
-  "FRCSC General Surgeon",
-  "Pelvic Health",
-  "Medical Aesthetics",
-  "Skin Treatments",
-  "Women's Wellness",
-  "Bay Roberts",
-  "St. John's",
-  "Newfoundland & Labrador",
-  "Health Canada Approved",
-  "Evidence-Based Care",
-]
-
-export function Marquee() {
+export function Marquee({ items }: { items: string[] }) {
   const doubled = [...items, ...items]
 
   return (

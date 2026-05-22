@@ -20,14 +20,14 @@ import { Reveal } from "@/components/wellness/motion/reveal"
 import { WordReveal } from "@/components/wellness/motion/word-reveal"
 import { Counter } from "@/components/wellness/motion/counter"
 import { Parallax, ParallaxScale } from "@/components/wellness/motion/parallax"
+import { cmsService } from "@/lib/cms/service"
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://spruceridgewellness.ca"
 
 export const metadata: Metadata = {
   title: {
-    absolute:
-      "Dr. Felicia Pickard, FRCSC | Founder, Spruce Ridge Wellness",
+    absolute: "Dr. Felicia Pickard, FRCSC | Founder, Spruce Ridge Wellness",
   },
   description:
     "Dr. Felicia Pickard, FRCSC, is a practicing general surgeon and the founder of Spruce Ridge Wellness in Newfoundland. Pelvic health and medical aesthetics, with clinics in Bay Roberts and at the Bense Clinic in St. John's.",
@@ -64,8 +64,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title:
-      "Dr. Felicia Pickard, FRCSC | Founder, Spruce Ridge Wellness",
+    title: "Dr. Felicia Pickard, FRCSC | Founder, Spruce Ridge Wellness",
     description:
       "Practicing general surgeon and founder of Spruce Ridge Wellness in Newfoundland. Pelvic health and medical aesthetics across Bay Roberts and St. John's.",
     url: `${SITE_URL}/about`,
@@ -83,8 +82,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title:
-      "Dr. Felicia Pickard, FRCSC | Founder, Spruce Ridge Wellness",
+    title: "Dr. Felicia Pickard, FRCSC | Founder, Spruce Ridge Wellness",
     description:
       "Practicing general surgeon and founder of Spruce Ridge Wellness in Newfoundland.",
     images: ["/images/dr-felicia.png"],
@@ -93,96 +91,14 @@ export const metadata: Metadata = {
 
 type Tone = "mist" | "blush" | "soft-stone" | "frost" | "sage" | "forest"
 
-const credentials: { mark: string; title: string; body: string }[] = [
-  {
-    mark: "BSc",
-    title: "Bachelor of Science",
-    body: "The undergraduate years. Reading bodies before treating them.",
-  },
-  {
-    mark: "MSc",
-    title: "Master of Science",
-    body: "A research degree. It taught her to slow down before reaching for an answer.",
-  },
-  {
-    mark: "MD",
-    title: "Doctor of Medicine",
-    body: "Med school and the long apprenticeship that comes with it.",
-  },
-  {
-    mark: "FRCSC",
-    title: "Royal College of Surgeons",
-    body: "Canadian fellowship in general surgery. Years of supervised operating before practicing on her own.",
-  },
-]
-
-const principles: {
-  icon: typeof Stethoscope
-  label: string
-  body: string
-  tone: Tone
-}[] = [
-  {
-    icon: Stethoscope,
-    label: "Listen First",
-    body: "The patient knows their body better than the chart does. Felicia tries to remember that every visit.",
-    tone: "mist",
-  },
-  {
-    icon: Compass,
-    label: "Less, More Often",
-    body: "Smaller doses, smaller adjustments, more check-ins. Quieter outcomes, fewer surprises.",
-    tone: "blush",
-  },
-  {
-    icon: HeartHandshake,
-    label: "Long Game",
-    body: "Pelvic care and aesthetics both reward patience. The plan is allowed to change as you do.",
-    tone: "sage",
-  },
-  {
-    icon: ScrollText,
-    label: "Plain Language",
-    body: "No jargon she would not say to her own family. Notes can go to your family doctor if you ask.",
-    tone: "soft-stone",
-  },
-]
-
-const stats: {
-  value: number
-  display: string
-  suffix?: string
-  label: string
-  tone: Tone
-}[] = [
-  {
-    value: 10,
-    display: "10",
-    suffix: "+ years",
-    label: "Surgical training and practice",
-    tone: "blush",
-  },
-  {
-    value: 2,
-    display: "2",
-    suffix: "clinics",
-    label: "Across the province",
-    tone: "mist",
-  },
-  {
-    value: 1,
-    display: "1",
-    suffix: "physician",
-    label: "Founder and lead clinician",
-    tone: "soft-stone",
-  },
-  {
-    value: 100,
-    display: "100",
-    suffix: "%",
-    label: "Physician-administered, every visit",
-    tone: "frost",
-  },
+// Visual styling for the four stat cards and four principles — design, not
+// content, so it stays in code while the text comes from the CMS.
+const statTones: Tone[] = ["blush", "mist", "soft-stone", "frost"]
+const principleStyles: { icon: typeof Stethoscope; tone: Tone }[] = [
+  { icon: Stethoscope, tone: "mist" },
+  { icon: Compass, tone: "blush" },
+  { icon: HeartHandshake, tone: "sage" },
+  { icon: ScrollText, tone: "soft-stone" },
 ]
 
 const toneSurface: Record<Tone, string> = {
@@ -475,7 +391,33 @@ function ChapterMark({ number, label }: { number: string; label: string }) {
   )
 }
 
-export default function AboutPage() {
+function paragraphs(text: string): string[] {
+  return text
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+}
+
+export default async function AboutPage() {
+  const c = await cmsService.getPageContent("about")
+  const nameLines = (c["hero.name"] ?? "").split("\n")
+  const credentials = [1, 2, 3, 4].map((n) => ({
+    mark: c[`cred${n}.mark`] ?? "",
+    title: c[`cred${n}.title`] ?? "",
+    body: c[`cred${n}.body`] ?? "",
+  }))
+  const principles = principleStyles.map((style, i) => ({
+    ...style,
+    label: c[`principle${i + 1}.label`] ?? "",
+    body: c[`principle${i + 1}.body`] ?? "",
+  }))
+  const stats = statTones.map((tone, i) => ({
+    tone,
+    number: Number(c[`stat${i + 1}.number`]) || 0,
+    suffix: c[`stat${i + 1}.suffix`] ?? "",
+    label: c[`stat${i + 1}.label`] ?? "",
+  }))
+
   return (
     <>
       <script
@@ -533,7 +475,7 @@ export default function AboutPage() {
                 </Link>
                 <span aria-hidden="true" className="h-px w-5 bg-deep-forest/30" />
                 <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-forest">
-                  About the Founder
+                  {c["hero.eyebrow"]}
                 </span>
               </div>
             </Reveal>
@@ -555,26 +497,26 @@ export default function AboutPage() {
                 <div className="col-span-12 order-2 flex flex-col justify-end lg:col-span-3 lg:order-1">
                   <Reveal delay={0.15}>
                     <p className="text-[10.5px] font-medium uppercase tracking-[0.24em] text-forest">
-                      This week
+                      {c["hero.thisWeekLabel"]}
                     </p>
                     <p className="mt-3 font-serif text-[18px] leading-[1.35] text-deep-forest sm:text-[20px]">
-                      Still in clinic. Still in scrubs.
+                      {c["hero.thisWeekText"]}
                     </p>
                   </Reveal>
 
                   <Reveal delay={0.25}>
                     <div className="mt-8 border-t border-deep-forest/10 pt-6">
                       <p className="text-[10.5px] font-medium uppercase tracking-[0.24em] text-deep-forest/50">
-                        Where you&apos;ll find her
+                        {c["hero.findHerLabel"]}
                       </p>
                       <ul className="mt-3 space-y-1.5 text-[13.5px] leading-[1.55] text-deep-forest/75">
                         <li className="flex items-start gap-2">
                           <MapPin size={13} strokeWidth={1.6} className="mt-1 shrink-0 text-ridge-gold" />
-                          Bay Roberts
+                          {c["hero.location1"]}
                         </li>
                         <li className="flex items-start gap-2">
                           <MapPin size={13} strokeWidth={1.6} className="mt-1 shrink-0 text-ridge-gold" />
-                          Bense Clinic, St. John&apos;s
+                          {c["hero.location2"]}
                         </li>
                       </ul>
                     </div>
@@ -599,8 +541,8 @@ export default function AboutPage() {
                           toScale={1.01}
                         >
                           <Image
-                            src="/images/dr-felicia.png"
-                            alt="Dr. Felicia Pickard, FRCSC, founder of Spruce Ridge Wellness in Newfoundland"
+                            src={c["hero.image"] || "/images/dr-felicia.png"}
+                            alt={c["hero.captionName"] || "Dr. Felicia Pickard"}
                             fill
                             priority
                             sizes="(max-width: 1024px) 100vw, 50vw"
@@ -611,7 +553,7 @@ export default function AboutPage() {
                         <div className="pointer-events-none absolute left-6 top-6 flex items-center gap-3 sm:left-8 sm:top-8">
                           <span aria-hidden="true" className="h-px w-6 bg-warm-cream" />
                           <span className="text-[10px] font-medium uppercase tracking-[0.24em] text-warm-cream/95">
-                            Founder · FRCSC
+                            {c["hero.badge"]}
                           </span>
                         </div>
                       </div>
@@ -638,7 +580,7 @@ export default function AboutPage() {
                 <div className="col-span-12 order-3 flex flex-col justify-end lg:col-span-3">
                   <Reveal delay={0.12}>
                     <p className="font-serif text-[20px] italic leading-tight text-ridge-gold sm:text-[22px]">
-                      Hi, I&apos;m Felicia.
+                      {c["hero.greeting"]}
                     </p>
                   </Reveal>
                   <Reveal delay={0.18}>
@@ -646,16 +588,17 @@ export default function AboutPage() {
                       id="about-headline"
                       className="mt-3 font-serif text-[32px] leading-[1.04] tracking-[-0.012em] text-deep-forest sm:text-[40px] lg:text-[44px]"
                     >
-                      <WordReveal delay={0.1}>Dr. Felicia</WordReveal>
-                      <span className="block italic">
-                        <WordReveal delay={0.4}>Pickard.</WordReveal>
-                      </span>
+                      <WordReveal delay={0.1}>{nameLines[0] ?? ""}</WordReveal>
+                      {nameLines[1] ? (
+                        <span className="block italic">
+                          <WordReveal delay={0.4}>{nameLines[1]}</WordReveal>
+                        </span>
+                      ) : null}
                     </h1>
                   </Reveal>
                   <Reveal delay={0.35}>
                     <p className="mt-5 text-[14.5px] leading-[1.65] text-deep-forest/75 sm:text-[15px]">
-                      Doctor, mother, wife, daughter, Newfoundlander. Spruce
-                      Ridge is the small clinic she runs.
+                      {c["hero.bio"]}
                     </p>
                   </Reveal>
                   <Reveal delay={0.5}>
@@ -664,7 +607,7 @@ export default function AboutPage() {
                         href="#practice"
                         className="group inline-flex items-center gap-2 text-[11.5px] font-medium uppercase tracking-[0.22em] text-deep-forest transition-all hover:gap-3"
                       >
-                        Read on
+                        {c["hero.readOn"]}
                         <ArrowDown size={13} strokeWidth={1.6} className="transition-transform group-hover:translate-y-0.5" />
                       </a>
                       <DottedCurve className="h-5 w-16 text-ridge-gold/60" />
@@ -677,10 +620,10 @@ export default function AboutPage() {
               <Reveal delay={0.4}>
                 <div className="relative z-10 mt-12 flex flex-wrap items-baseline gap-x-6 gap-y-3 border-t border-deep-forest/10 pt-6 sm:mt-16 sm:gap-x-10">
                   <p className="font-serif text-[22px] tracking-tight text-deep-forest sm:text-[24px]">
-                    Dr. Felicia Pickard
+                    {c["hero.captionName"]}
                   </p>
                   <p className="text-[10.5px] font-medium uppercase tracking-[0.24em] text-deep-forest/55">
-                    Practicing general surgeon &middot; FRCSC
+                    {c["hero.captionRole"]}
                   </p>
                 </div>
               </Reveal>
@@ -695,34 +638,21 @@ export default function AboutPage() {
         >
           <div className="mx-auto max-w-[1280px]">
             <Reveal>
-              <ChapterMark number="01" label="The Practice" />
+              <ChapterMark number="01" label={c["practice.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-10 grid gap-12 lg:grid-cols-12 lg:gap-16 sm:mt-14">
               <div className="lg:col-span-7">
                 <Reveal>
                   <h2 className="font-serif text-[36px] leading-[1.05] tracking-[-0.012em] text-deep-forest sm:text-[46px] lg:text-[54px]">
-                    Same hands,{" "}
-                    <span className="italic">every visit.</span>
+                    {c["practice.heading"]}
                   </h2>
                 </Reveal>
                 <Reveal delay={0.1}>
                   <div className="mt-7 space-y-5 text-[15.5px] leading-[1.7] text-deep-forest/80 sm:text-[17px]">
-                    <p>
-                      When Felicia treats you, it is Felicia treating you. The
-                      chart is hers. The plan is hers. The next visit is hers
-                      too.
-                    </p>
-                    <p>
-                      Patients tell their story once. Decisions stay in the
-                      same person&apos;s head from one visit to the next.
-                      Adjustments are quiet, because someone is still keeping
-                      track.
-                    </p>
-                    <p>
-                      That is the only thing she asked of the clinic when she
-                      started it. Everything else came after.
-                    </p>
+                    {paragraphs(c["practice.body"] ?? "").map((p, i) => (
+                      <p key={i}>{p}</p>
+                    ))}
                   </div>
                 </Reveal>
               </div>
@@ -730,7 +660,7 @@ export default function AboutPage() {
               <div className="lg:col-span-5">
                 <div className="grid grid-cols-2 gap-4 sm:gap-5">
                   {stats.map((s, i) => (
-                    <Reveal key={s.label} delay={i * 0.07} duration={0.7}>
+                    <Reveal key={i} delay={i * 0.07} duration={0.7}>
                       <div
                         className={`group relative h-full overflow-hidden rounded-3xl ${toneSurface[s.tone]} p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,42,31,0.25)] sm:p-7`}
                       >
@@ -740,7 +670,7 @@ export default function AboutPage() {
                         />
                         <div className="flex items-baseline gap-1.5 pl-3.5">
                           <span className="font-serif text-[40px] leading-none text-deep-forest sm:text-[48px]">
-                            <Counter to={s.value} />
+                            <Counter to={s.number} />
                           </span>
                           {s.suffix && (
                             <span className="font-serif text-[18px] text-ridge-gold sm:text-[20px]">
@@ -771,26 +701,25 @@ export default function AboutPage() {
         >
           <div className="mx-auto max-w-[1280px]">
             <Reveal>
-              <ChapterMark number="02" label="The Path" />
+              <ChapterMark number="02" label={c["training.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-10 flex flex-col gap-6 sm:mt-14 sm:flex-row sm:items-end sm:justify-between">
               <Reveal delay={0.06}>
                 <h2 className="max-w-[680px] font-serif text-[34px] leading-[1.06] tracking-[-0.012em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-                  Four letters,{" "}
-                  <span className="italic">a long apprenticeship.</span>
+                  {c["training.heading"]}
                 </h2>
               </Reveal>
               <Reveal delay={0.12}>
                 <p className="max-w-[360px] text-[14.5px] leading-[1.65] text-deep-forest/70 sm:text-[15px]">
-                  What each one was, and what it taught her.
+                  {c["training.note"]}
                 </p>
               </Reveal>
             </div>
 
             <div className="mt-12 grid gap-5 sm:mt-16 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
               {credentials.map(({ mark, title, body }, i) => (
-                <Reveal key={mark} delay={i * 0.08} duration={0.8}>
+                <Reveal key={i} delay={i * 0.08} duration={0.8}>
                   <div className="group flex h-full flex-col rounded-3xl border border-frost bg-warm-cream p-7 transition-all duration-500 hover:-translate-y-2 hover:border-deep-forest/15 hover:shadow-[0_28px_70px_-30px_rgba(15,42,31,0.22)] sm:p-8">
                     <div className="flex items-baseline justify-between">
                       <span className="font-serif text-[40px] leading-none text-ridge-gold sm:text-[48px]">
@@ -815,7 +744,7 @@ export default function AboutPage() {
             <Reveal variant="fade" delay={0.3}>
               <p className="mt-12 flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-deep-forest/45 sm:mt-14">
                 <GraduationCap size={14} strokeWidth={1.4} className="text-ridge-gold/80" />
-                FRCSC denotes Fellowship of the Royal College of Surgeons of Canada
+                {c["training.footnote"]}
               </p>
             </Reveal>
           </div>
@@ -833,14 +762,11 @@ export default function AboutPage() {
                   className="mx-auto -mb-2 text-ridge-gold/70 sm:size-12"
                 />
                 <blockquote className="font-serif text-[28px] leading-[1.25] tracking-[-0.005em] text-deep-forest sm:text-[36px] lg:text-[44px]">
-                  <span className="italic">
-                    I would rather start small and adjust than start big and
-                    apologize.
-                  </span>
+                  <span className="italic">{c["quote.text"]}</span>
                 </blockquote>
                 <DottedCurve className="mx-auto mt-6 h-5 w-24 text-ridge-gold/60" />
                 <p className="mt-5 text-[10.5px] font-medium uppercase tracking-[0.24em] text-deep-forest/55">
-                  Felicia
+                  {c["quote.attribution"]}
                 </p>
               </div>
             </Reveal>
@@ -877,27 +803,25 @@ export default function AboutPage() {
 
               <div className="relative">
                 <Reveal>
-                  <ChapterMark number="03" label="Philosophy" />
+                  <ChapterMark number="03" label={c["philosophy.label"] ?? ""} />
                 </Reveal>
 
                 <div className="mt-8 max-w-[760px] sm:mt-10">
                   <Reveal delay={0.06}>
                     <h2 className="font-serif text-[34px] leading-[1.05] tracking-[-0.012em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-                      How she{" "}
-                      <span className="italic">tries to work.</span>
+                      {c["philosophy.heading"]}
                     </h2>
                   </Reveal>
                   <Reveal delay={0.12}>
                     <p className="mt-6 max-w-[520px] text-[15px] leading-[1.7] text-deep-forest/75 sm:text-[16px]">
-                      Notes she pinned for herself a long time ago. They are
-                      reminders, not promises.
+                      {c["philosophy.intro"]}
                     </p>
                   </Reveal>
                 </div>
 
                 <div className="mt-12 grid grid-cols-1 gap-6 sm:mt-14 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
                   {principles.map(({ icon: Icon, label, body, tone }, i) => (
-                    <Reveal key={label} delay={0.06 + i * 0.07} duration={0.8}>
+                    <Reveal key={i} delay={0.06 + i * 0.07} duration={0.8}>
                       <div className="group flex h-full flex-col items-center text-center">
                         <span className="relative inline-flex h-20 w-20 items-center justify-center sm:h-24 sm:w-24">
                           <span
@@ -947,7 +871,7 @@ export default function AboutPage() {
               <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
                 <Parallax className="absolute inset-0" from={-50} to={50}>
                   <Image
-                    src="/images/nature.jpg"
+                    src={c["place.image"] || "/images/nature.jpg"}
                     alt=""
                     fill
                     sizes="(max-width: 1280px) 100vw, 1280px"
@@ -967,15 +891,14 @@ export default function AboutPage() {
                       </span>
                       <span aria-hidden="true" className="h-px w-10 bg-warm-cream/30" />
                       <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-mist">
-                        Place
+                        {c["place.label"]}
                       </span>
                     </div>
                   </Reveal>
 
                   <Reveal delay={0.06}>
                     <h2 className="mt-8 font-serif text-[32px] leading-[1.06] tracking-[-0.012em] text-warm-cream sm:text-[42px] lg:text-[48px]">
-                      Newfoundland{" "}
-                      <span className="italic">is home.</span>
+                      {c["place.heading"]}
                     </h2>
                   </Reveal>
                 </div>
@@ -983,23 +906,9 @@ export default function AboutPage() {
                 <div className="lg:col-span-7">
                   <Reveal delay={0.12}>
                     <div className="space-y-5 text-[15px] leading-[1.7] text-warm-cream/80 sm:text-[16px]">
-                      <p>
-                        Felicia practices here because she lives here. The
-                        province is small. The medical community is smaller
-                        than that. Patients are not a stream of strangers; they
-                        are people she will see again, at a wharf or a wedding
-                        or the grocery store.
-                      </p>
-                      <p>
-                        That changes how you work. The chart is never
-                        anonymous. A decision made today is one she will live
-                        with at the next visit, and the one after.
-                      </p>
-                      <p>
-                        She did not start the clinic to grow it. She started it
-                        so the people on this island had someone steady to
-                        come back to.
-                      </p>
+                      {paragraphs(c["place.body"] ?? "").map((p, i) => (
+                        <p key={i}>{p}</p>
+                      ))}
                     </div>
                   </Reveal>
                 </div>
@@ -1030,34 +939,23 @@ export default function AboutPage() {
           />
           <div className="relative mx-auto max-w-[1280px]">
             <Reveal>
-              <ChapterMark number="05" label="Off the Chart" />
+              <ChapterMark number="05" label={c["offchart.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-10 grid gap-12 lg:grid-cols-12 lg:gap-16 sm:mt-14">
               <div className="lg:col-span-7">
                 <Reveal delay={0.06}>
                   <h2 className="font-serif text-[34px] leading-[1.06] tracking-[-0.012em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-                    Doctor.{" "}
-                    <span className="italic">Mother. Wife. Daughter.</span>
+                    {c["offchart.heading"]}
                   </h2>
                 </Reveal>
                 <Reveal delay={0.12}>
                   <div className="mt-7 space-y-5 text-[15.5px] leading-[1.7] text-deep-forest/80 sm:text-[17px]">
-                    <p>
-                      The person who walks into the operating room is the same
-                      one who packs school lunches and texts her mum back. The
-                      life outside of medicine is not a competing thing. It is
-                      the reason there is medicine in the first place.
-                    </p>
-                    <p>
-                      It also means she has been on the patient side of the
-                      desk. The waiting. The not-knowing. The wanting to feel
-                      a bit more like yourself again. None of that is
-                      theoretical to her.
-                    </p>
+                    {paragraphs(c["offchart.body"] ?? "").map((p, i) => (
+                      <p key={i}>{p}</p>
+                    ))}
                   </div>
                 </Reveal>
-
               </div>
 
               <div className="lg:col-span-5">
@@ -1072,15 +970,14 @@ export default function AboutPage() {
                       className="pointer-events-none absolute -left-5 -bottom-4 h-14 w-12 rotate-[110deg] text-forest/55 animate-drift-slow"
                     />
                     <p className="font-serif text-[16px] italic leading-[1.55] text-ridge-gold sm:text-[17px]">
-                      A note from Felicia
+                      {c["offchart.noteLabel"]}
                     </p>
                     <p className="mt-4 font-serif text-[20px] leading-[1.4] text-deep-forest sm:text-[22px]">
-                      I started Spruce Ridge for the patients I would want my
-                      own mum, sister, or daughter to see.
+                      {c["offchart.noteText"]}
                     </p>
                     <DottedCurve className="mt-6 h-5 w-20 text-ridge-gold/60" />
                     <p className="mt-5 text-[10.5px] font-medium uppercase tracking-[0.24em] text-deep-forest/55">
-                      Felicia
+                      {c["offchart.noteAttribution"]}
                     </p>
                   </div>
                 </Reveal>
@@ -1104,19 +1001,16 @@ export default function AboutPage() {
               <div className="relative grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-14">
                 <div className="lg:col-span-7">
                   <Reveal>
-                    <ChapterMark number="06" label="Visit" />
+                    <ChapterMark number="06" label={c["visit.label"] ?? ""} />
                   </Reveal>
                   <Reveal delay={0.06}>
                     <h2 className="mt-7 font-serif text-[32px] leading-[1.06] tracking-[-0.012em] text-deep-forest sm:text-[42px] lg:text-[48px]">
-                      Sit down with{" "}
-                      <span className="italic">Felicia.</span>
+                      {c["visit.heading"]}
                     </h2>
                   </Reveal>
                   <Reveal delay={0.12}>
                     <p className="mt-6 max-w-[520px] text-[15px] leading-[1.65] text-deep-forest/75 sm:text-[16px]">
-                      Bring your questions. We talk through what is bothering
-                      you and what the options are. Whatever you decide is up
-                      to you.
+                      {c["visit.body"]}
                     </p>
                   </Reveal>
                 </div>
@@ -1125,19 +1019,19 @@ export default function AboutPage() {
                   <Reveal delay={0.18}>
                     <div className="flex flex-wrap items-center gap-3 lg:justify-end">
                       <a
-                        href="https://spruceridgewellness.janeapp.com"
+                        href={c["visit.bookUrl"] || "https://spruceridgewellness.janeapp.com"}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group inline-flex items-center gap-3 rounded-full bg-ridge-gold px-7 py-4 text-[12px] font-medium uppercase tracking-[0.22em] text-warm-cream transition-all hover:gap-4 hover:bg-ridge-gold/90"
                       >
-                        Book a Consultation
+                        {c["visit.bookLabel"]}
                         <ArrowUpRight size={14} strokeWidth={1.8} />
                       </a>
                       <Link
-                        href="/services"
+                        href={c["visit.servicesUrl"] || "/services"}
                         className="inline-flex items-center rounded-full border border-deep-forest/25 px-7 py-4 text-[12px] font-medium uppercase tracking-[0.22em] text-deep-forest transition-all hover:border-deep-forest hover:bg-deep-forest/5"
                       >
-                        See Services
+                        {c["visit.servicesLabel"]}
                       </Link>
                     </div>
                   </Reveal>

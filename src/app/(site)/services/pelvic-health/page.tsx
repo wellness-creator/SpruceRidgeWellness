@@ -22,13 +22,13 @@ import { SectionNav } from "@/components/wellness/motion/section-nav"
 import { Reveal } from "@/components/wellness/motion/reveal"
 import { WordReveal } from "@/components/wellness/motion/word-reveal"
 import { Counter } from "@/components/wellness/motion/counter"
+import { cmsService } from "@/lib/cms/service"
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://spruceridgewellness.ca"
 
 export const metadata: Metadata = {
-  title:
-    "Pelvic Health & BTL Emsella in Newfoundland | Spruce Ridge Wellness",
+  title: "Pelvic Health & BTL Emsella in Newfoundland | Spruce Ridge Wellness",
   description:
     "Surgeon-led BTL Emsella pelvic floor therapy at Spruce Ridge Wellness in Bay Roberts and St. John's, Newfoundland. Non-invasive, Health Canada approved care for incontinence, postpartum recovery, prolapse, and pelvic floor weakness.",
   keywords: [
@@ -81,257 +81,18 @@ export const metadata: Metadata = {
   },
 }
 
-const heroChips = [
-  "FRCSC Surgeon-Led",
-  "Health Canada Approved",
-  "Bay Roberts · St. John's",
-]
-
-const ticker = [
-  "Stress Incontinence",
-  "Urge Incontinence",
-  "Postpartum Recovery",
-  "Pelvic Floor Weakness",
-  "Bladder Leakage",
-  "Hormonal & Intimate Health",
-  "Core Re-engagement",
-  "Menopause Support",
-]
-
 type Tone = "mist" | "blush" | "soft-stone" | "frost" | "sage" | "forest"
 
-const stats: {
-  value: number
-  display: string
-  suffix?: string
-  label: string
-  tone: Tone
-}[] = [
-  {
-    value: 95,
-    display: "95",
-    suffix: "%",
-    label: "Patients report a better quality of life",
-    tone: "mist",
-  },
-  {
-    value: 70,
-    display: "70",
-    suffix: "%+",
-    label: "Less reliance on pads, day to day",
-    tone: "blush",
-  },
-  {
-    value: 28,
-    display: "28",
-    suffix: "min",
-    label: "Per session, fully clothed",
-    tone: "soft-stone",
-  },
-  {
-    value: 6,
-    display: "6",
-    label: "Sessions across three weeks",
-    tone: "frost",
-  },
+// Card colours and icons are design, not content — they stay in code and zip
+// with the CMS text by index.
+const statTones: Tone[] = ["mist", "blush", "soft-stone", "frost"]
+const safetyStyles: { icon: typeof Bone; tone: Tone }[] = [
+  { icon: Bone, tone: "sage" },
+  { icon: Baby, tone: "blush" },
+  { icon: Microscope, tone: "forest" },
+  { icon: HeartPulse, tone: "mist" },
 ]
-
-const safetyHighlights: {
-  icon: typeof Bone
-  label: string
-  body: string
-  tone: Tone
-}[] = [
-  {
-    icon: Bone,
-    label: "Metal Implants",
-    body: "Safe alongside hip, knee, and other non-pelvic metal implants.",
-    tone: "sage",
-  },
-  {
-    icon: Baby,
-    label: "Pregnancy",
-    body: "Non-invasive postpartum care, no needles, no downtime.",
-    tone: "blush",
-  },
-  {
-    icon: Microscope,
-    label: "Tumor",
-    body: "Non-thermal, non-radiation, clinically proven technology.",
-    tone: "forest",
-  },
-  {
-    icon: HeartPulse,
-    label: "Heart Disorders",
-    body: "Suitable for most cardiac patients. We screen for pacemakers at intake.",
-    tone: "mist",
-  },
-]
-
-const journey: {
-  step: string
-  title: string
-  body: string
-  icon: typeof Stethoscope
-}[] = [
-  {
-    step: "01",
-    title: "Listen & Assess",
-    body:
-      "We sit down before we treat. Your history, your goals, your concerns, all the way through. No rushing, no judgement, no pressure.",
-    icon: Stethoscope,
-  },
-  {
-    step: "02",
-    title: "Sit & Strengthen",
-    body:
-      "Settle into the Emsella chair, fully clothed. For 28 minutes, focused electromagnetic pulses do the work of thousands of Kegels while you read, scroll, or simply breathe.",
-    icon: Activity,
-  },
-  {
-    step: "03",
-    title: "Reassess & Refine",
-    body:
-      "Every session opens with a check in. We track how you are responding and tune the intensity to match how your pelvic floor is rebuilding.",
-    icon: LineChart,
-  },
-  {
-    step: "04",
-    title: "Live the Difference",
-    body:
-      "Stronger bladder control, less urgency, a quieter relationship with your body. Most patients notice changes within two to four weeks.",
-    icon: Sparkles,
-  },
-]
-
-const conditions = [
-  {
-    title: "Stress Incontinence",
-    body: "Leaks when you cough, laugh, sneeze, or work out.",
-  },
-  {
-    title: "Urge Incontinence",
-    body: "Sudden urgency, frequent bathroom trips, the feeling you cannot hold it.",
-  },
-  {
-    title: "Postpartum Weakness",
-    body: "Core and pelvic floor changes that did not fully bounce back.",
-  },
-  {
-    title: "Mild Prolapse",
-    body: "Pressure or heaviness that responds to non-surgical strengthening.",
-  },
-  {
-    title: "Intimate Satisfaction",
-    body: "Reduced sensation or weakened tone affecting intimacy.",
-  },
-  {
-    title: "Menopausal Changes",
-    body: "Hormonal shifts loosening your pelvic support over time.",
-  },
-]
-
-const idealFor = [
-  "You leak when you cough, laugh, sneeze, or work out",
-  "You're postpartum and your core or pelvic floor still feels weak",
-  "You feel sudden urgency or run to the bathroom too often",
-  "You want a non-invasive option before considering surgery",
-  "You're heading into menopause and noticing pelvic changes",
-  "Your pelvic health is affecting your confidence or intimacy",
-]
-
-const discussFirst = [
-  "You have a pacemaker or implanted defibrillator",
-  "You are currently pregnant",
-  "You have a copper IUD or active implant near the pelvis",
-  "You have severe (Grade 3+) pelvic organ prolapse",
-  "You have an active pelvic infection or unhealed surgical site",
-]
-
-const faqs = [
-  {
-    q: "Does it hurt?",
-    a: "No. You stay fully clothed and feel a gentle tingling and contracting sensation throughout the session. Most patients describe it as oddly relaxing.",
-  },
-  {
-    q: "How many sessions will I need?",
-    a: "Six sessions, twice a week over three weeks. Most patients notice a difference by session two or three, and results continue to build for weeks afterward.",
-  },
-  {
-    q: "When will I see results?",
-    a: "Most patients see improvements in bladder control and core strength within two to four weeks of starting. Final results typically settle in a few weeks after your last session.",
-  },
-  {
-    q: "Is it safe after childbirth?",
-    a: "Yes, once your physician has cleared you. Typically that's around six weeks postpartum, a little longer after a C-section.",
-  },
-  {
-    q: "Is it covered by insurance?",
-    a: "Provincial insurance does not cover Emsella, but many private extended health plans reimburse part of the cost. We provide detailed receipts for your provider.",
-  },
-  {
-    q: "Do I need a referral?",
-    a: "No. Most patients self-refer. With your consent, we can also coordinate notes with your family physician.",
-  },
-  {
-    q: "What should I wear?",
-    a: "Anything comfortable. We'll ask you to remove metal items like belts and large buckles before the session.",
-  },
-  {
-    q: "Are both clinics offering Emsella?",
-    a: "Yes. BTL Emsella and pelvic health care are available at our Bay Roberts clinic and our St. John's location at the Bense Clinic.",
-  },
-]
-
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "MedicalBusiness",
-      "@id": `${SITE_URL}/#business`,
-      name: "Spruce Ridge Wellness",
-      url: SITE_URL,
-      telephone: "+1-709-786-9150",
-      areaServed: {
-        "@type": "AdministrativeArea",
-        name: "Newfoundland and Labrador",
-      },
-    },
-    {
-      "@type": "WebPage",
-      "@id": `${SITE_URL}/services/pelvic-health#webpage`,
-      url: `${SITE_URL}/services/pelvic-health`,
-      name: "Pelvic Health at Spruce Ridge Wellness",
-      description:
-        "Surgeon-led, non-invasive pelvic floor therapy with BTL Emsella, postpartum recovery, and incontinence support across two Newfoundland clinics.",
-      isPartOf: { "@id": `${SITE_URL}/#business` },
-    },
-    {
-      "@type": "MedicalProcedure",
-      name: "BTL Emsella Pelvic Floor Therapy",
-      url: `${SITE_URL}/services/pelvic-health`,
-      procedureType: "https://schema.org/PhysicalTherapy",
-      bodyLocation: "Pelvic floor",
-      howPerformed:
-        "Patient sits fully clothed on the Emsella chair while high-intensity focused electromagnetic technology delivers approximately 11,000 supramaximal pelvic floor contractions over a 28-minute session.",
-      indication: [
-        { "@type": "MedicalCondition", name: "Stress urinary incontinence" },
-        { "@type": "MedicalCondition", name: "Urge urinary incontinence" },
-        { "@type": "MedicalCondition", name: "Postpartum pelvic floor weakness" },
-        { "@type": "MedicalCondition", name: "Mild to moderate pelvic organ prolapse" },
-      ],
-      performedBy: { "@id": `${SITE_URL}/#business` },
-    },
-    {
-      "@type": "FAQPage",
-      mainEntity: faqs.map((f) => ({
-        "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
-      })),
-    },
-  ],
-}
+const journeyIcons: (typeof Stethoscope)[] = [Stethoscope, Activity, LineChart, Sparkles]
 
 const toneSurface: Record<Tone, string> = {
   mist: "bg-mist/55",
@@ -374,7 +135,102 @@ function ChapterMark({ number, label }: { number: string; label: string }) {
   )
 }
 
-export default function PelvicHealthPage() {
+function splitLines(value: string): string[] {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
+function paragraphs(text: string): string[] {
+  return text
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+}
+
+export default async function PelvicHealthPage() {
+  const c = await cmsService.getPageContent("pelvic-health")
+  const headingLines = (c["hero.heading"] ?? "").split("\n")
+  const heroChips = splitLines(c["hero.chips"] ?? "")
+  const ticker = splitLines(c["ticker"] ?? "")
+  const stats = statTones.map((tone, i) => ({
+    tone,
+    value: Number(c[`stat${i + 1}.number`]) || 0,
+    suffix: c[`stat${i + 1}.suffix`] ?? "",
+    label: c[`stat${i + 1}.label`] ?? "",
+  }))
+  const safetyHighlights = safetyStyles.map((style, i) => ({
+    ...style,
+    label: c[`safety${i + 1}.label`] ?? "",
+    body: c[`safety${i + 1}.body`] ?? "",
+  }))
+  const journey = journeyIcons.map((icon, i) => ({
+    icon,
+    step: String(i + 1).padStart(2, "0"),
+    title: c[`journey${i + 1}.title`] ?? "",
+    body: c[`journey${i + 1}.body`] ?? "",
+  }))
+  const conditions = [1, 2, 3, 4, 5, 6].map((n) => ({
+    title: c[`condition${n}.title`] ?? "",
+    body: c[`condition${n}.body`] ?? "",
+  }))
+  const idealFor = splitLines(c["fit.goodFit"] ?? "")
+  const discussFirst = splitLines(c["fit.talkFirst"] ?? "")
+  const faqs = [1, 2, 3, 4, 5, 6, 7, 8]
+    .map((n) => ({ q: c[`faq${n}.q`] ?? "", a: c[`faq${n}.a`] ?? "" }))
+    .filter((f) => f.q)
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "MedicalBusiness",
+        "@id": `${SITE_URL}/#business`,
+        name: "Spruce Ridge Wellness",
+        url: SITE_URL,
+        telephone: "+1-709-786-9150",
+        areaServed: {
+          "@type": "AdministrativeArea",
+          name: "Newfoundland and Labrador",
+        },
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${SITE_URL}/services/pelvic-health#webpage`,
+        url: `${SITE_URL}/services/pelvic-health`,
+        name: "Pelvic Health at Spruce Ridge Wellness",
+        description:
+          "Surgeon-led, non-invasive pelvic floor therapy with BTL Emsella, postpartum recovery, and incontinence support across two Newfoundland clinics.",
+        isPartOf: { "@id": `${SITE_URL}/#business` },
+      },
+      {
+        "@type": "MedicalProcedure",
+        name: "BTL Emsella Pelvic Floor Therapy",
+        url: `${SITE_URL}/services/pelvic-health`,
+        procedureType: "https://schema.org/PhysicalTherapy",
+        bodyLocation: "Pelvic floor",
+        howPerformed:
+          "Patient sits fully clothed on the Emsella chair while high-intensity focused electromagnetic technology delivers approximately 11,000 supramaximal pelvic floor contractions over a 28-minute session.",
+        indication: [
+          { "@type": "MedicalCondition", name: "Stress urinary incontinence" },
+          { "@type": "MedicalCondition", name: "Urge urinary incontinence" },
+          { "@type": "MedicalCondition", name: "Postpartum pelvic floor weakness" },
+          { "@type": "MedicalCondition", name: "Mild to moderate pelvic organ prolapse" },
+        ],
+        performedBy: { "@id": `${SITE_URL}/#business` },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
+    ],
+  }
+
   return (
     <>
       <script
@@ -415,7 +271,7 @@ export default function PelvicHealthPage() {
                   </Link>
                   <span aria-hidden="true" className="h-px w-5 bg-deep-forest/30" />
                   <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-forest">
-                    Pelvic Health
+                    {c["hero.eyebrow"]}
                   </span>
                 </div>
               </Reveal>
@@ -424,38 +280,36 @@ export default function PelvicHealthPage() {
                 id="pelvic-headline"
                 className="mt-7 max-w-[640px] font-serif text-[44px] leading-[1.02] tracking-[-0.012em] text-deep-forest sm:text-[58px] lg:text-[72px]"
               >
-                <WordReveal delay={0.1}>The pelvic floor clinic</WordReveal>{" "}
-                <WordReveal delay={0.45} className="italic">
-                  Newfoundland was missing.
-                </WordReveal>
+                <WordReveal delay={0.1}>{headingLines[0] ?? ""}</WordReveal>{" "}
+                {headingLines[1] ? (
+                  <WordReveal delay={0.45} className="italic">
+                    {headingLines[1]}
+                  </WordReveal>
+                ) : null}
               </h1>
 
               <Reveal delay={0.85} duration={0.9}>
                 <p className="mt-7 max-w-[520px] text-[15.5px] leading-[1.7] text-deep-forest/75 sm:text-[17px]">
-                  Surgeon-led pelvic care that meets you where you are.
-                  Non-invasive treatment for incontinence, postpartum recovery,
-                  and pelvic floor weakness, without surgery, needles, or
-                  recovery time. Two Newfoundland clinics, in Bay&nbsp;Roberts
-                  and St.&nbsp;John&apos;s, ready when you are.
+                  {c["hero.intro"]}
                 </p>
               </Reveal>
 
               <Reveal delay={0.95} duration={0.9}>
                 <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-5">
                   <a
-                    href="https://spruceridgewellness.janeapp.com"
+                    href={c["hero.bookUrl"] || "https://spruceridgewellness.janeapp.com"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group inline-flex items-center gap-3 rounded-full bg-ridge-gold px-7 py-4 text-[12px] font-medium uppercase tracking-[0.22em] text-warm-cream transition-all hover:gap-4 hover:bg-ridge-gold/90"
                   >
-                    Book a Consultation
+                    {c["hero.bookLabel"]}
                     <ArrowUpRight size={14} strokeWidth={1.8} />
                   </a>
                   <a
                     href="#emsella"
                     className="group inline-flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.22em] text-deep-forest transition-all hover:gap-3"
                   >
-                    How Emsella Works
+                    {c["hero.secondaryLabel"]}
                     <ArrowDown
                       size={14}
                       strokeWidth={1.6}
@@ -482,7 +336,7 @@ export default function PelvicHealthPage() {
               <Reveal variant="scale" duration={1.1}>
                 <div className="relative aspect-[4/5] w-full overflow-hidden rounded-[28px] bg-soft-stone sm:aspect-[5/6]">
                   <Image
-                    src="/images/pelvic.png"
+                    src={c["hero.image"] || "/images/pelvic.png"}
                     alt="Patient seated comfortably during a non-invasive BTL Emsella pelvic floor session at Spruce Ridge Wellness in Newfoundland"
                     fill
                     priority
@@ -495,12 +349,10 @@ export default function PelvicHealthPage() {
               <Reveal delay={0.4} duration={1}>
                 <div className="absolute -bottom-6 -left-3 hidden items-center gap-4 rounded-2xl border border-frost bg-warm-cream/95 px-5 py-4 shadow-[0_18px_60px_-30px_rgba(15,42,31,0.35)] backdrop-blur-sm sm:flex sm:-bottom-8 sm:-left-6 sm:px-6 sm:py-5">
                   <div className="font-serif text-[36px] leading-none text-deep-forest sm:text-[44px]">
-                    <Counter to={11000} duration={2} />
+                    <Counter to={Number(c["hero.statNumber"]) || 0} duration={2} />
                   </div>
                   <div className="text-[10.5px] uppercase tracking-[0.22em] text-deep-forest/60">
-                    Pelvic floor contractions
-                    <br />
-                    in a single session
+                    {c["hero.statLabel"]}
                   </div>
                 </div>
               </Reveal>
@@ -534,7 +386,7 @@ export default function PelvicHealthPage() {
         >
           <div className="mx-auto max-w-[1280px]">
             <Reveal>
-              <ChapterMark number="01" label="Overview" />
+              <ChapterMark number="01" label={c["overview.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-10 grid gap-12 lg:grid-cols-12 lg:gap-16 sm:mt-14">
@@ -543,7 +395,7 @@ export default function PelvicHealthPage() {
                 <Reveal variant="scale" duration={1}>
                   <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-soft-stone">
                     <Image
-                      src="/images/machine.png"
+                      src={c["overview.image"] || "/images/machine.png"}
                       alt="BTL Emsella pelvic floor therapy device at Spruce Ridge Wellness in Newfoundland"
                       fill
                       sizes="(max-width: 1024px) 100vw, 50vw"
@@ -554,7 +406,7 @@ export default function PelvicHealthPage() {
 
                 <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-5">
                   {stats.map((s, i) => (
-                    <Reveal key={s.label} delay={i * 0.07} duration={0.7}>
+                    <Reveal key={i} delay={i * 0.07} duration={0.7}>
                       <div
                         className={`group relative h-full overflow-hidden rounded-3xl ${toneSurface[s.tone]} p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,42,31,0.25)] sm:p-7`}
                       >
@@ -601,28 +453,14 @@ export default function PelvicHealthPage() {
               <div className="lg:col-span-6 lg:order-2 lg:sticky lg:top-28 lg:self-start">
                 <Reveal>
                   <h2 className="font-serif text-[36px] leading-[1.05] tracking-[-0.012em] text-deep-forest sm:text-[46px] lg:text-[56px]">
-                    11,000 reasons to feel{" "}
-                    <span className="italic">confident again.</span>
+                    {c["overview.heading"]}
                   </h2>
                 </Reveal>
                 <Reveal delay={0.1}>
                   <div className="mt-7 space-y-5 text-[15.5px] leading-[1.7] text-deep-forest/80 sm:text-[17px]">
-                    <p>
-                      BTL Emsella is the Health Canada approved, non-invasive
-                      pelvic floor treatment we wish more women in Newfoundland
-                      knew about. In 28 minutes, focused electromagnetic
-                      technology triggers the equivalent of 11,000 Kegel
-                      contractions. Stronger, deeper, and far more consistent
-                      than anything you could do on your own.
-                    </p>
-                    <p>
-                      You stay fully clothed and seated the entire time. Most
-                      patients describe it as a gentle tingling, a deep
-                      contraction, even a chance to read in peace. There is no
-                      downtime. No recovery period. Nothing visible afterward.
-                      You walk out of our Bay&nbsp;Roberts or
-                      St.&nbsp;John&apos;s clinic and get on with your day.
-                    </p>
+                    {paragraphs(c["overview.body"] ?? "").map((p, i) => (
+                      <p key={i}>{p}</p>
+                    ))}
                   </div>
                 </Reveal>
               </div>
@@ -637,7 +475,6 @@ export default function PelvicHealthPage() {
         >
           <div className="mx-auto max-w-[1400px]">
             <div className="relative overflow-hidden rounded-[32px] bg-mist/40 px-6 py-16 sm:rounded-[40px] sm:px-12 sm:py-20 lg:px-16 lg:py-24">
-              {/* atmospheric gradients */}
               <span
                 aria-hidden="true"
                 className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-sage/30 blur-3xl"
@@ -649,20 +486,18 @@ export default function PelvicHealthPage() {
 
               <div className="relative">
                 <Reveal>
-                  <ChapterMark number="02" label="Clinical Safety" />
+                  <ChapterMark number="02" label={c["safety.label"] ?? ""} />
                 </Reveal>
 
                 <div className="mt-8 max-w-[760px] sm:mt-10">
                   <Reveal delay={0.06}>
                     <h2 className="font-serif text-[34px] leading-[1.05] tracking-[-0.012em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-                      Advanced therapy.{" "}
-                      <span className="italic">Better outcomes.</span>
+                      {c["safety.heading"]}
                     </h2>
                   </Reveal>
                   <Reveal delay={0.12}>
                     <p className="mt-6 max-w-[480px] text-[15px] leading-[1.7] text-deep-forest/75 sm:text-[16px]">
-                      Designed for real bodies and real lives. Safety profiles
-                      you (and your physician) can trust.
+                      {c["safety.intro"]}
                     </p>
                   </Reveal>
                 </div>
@@ -673,7 +508,7 @@ export default function PelvicHealthPage() {
                     <Reveal variant="scale" duration={1}>
                       <div className="relative mx-auto aspect-[4/5] max-w-[400px] overflow-hidden rounded-[24px] bg-warm-cream/40 shadow-[0_24px_60px_-30px_rgba(15,42,31,0.25)]">
                         <Image
-                          src="/images/Section%2002.png"
+                          src={c["safety.image"] || "/images/Section%2002.png"}
                           alt="BTL Emsella clinical safety profile illustration"
                           fill
                           sizes="(max-width: 1024px) 100vw, 30vw"
@@ -692,7 +527,7 @@ export default function PelvicHealthPage() {
                     ][i]
                     return (
                       <Reveal
-                        key={label}
+                        key={i}
                         delay={0.06 + i * 0.07}
                         duration={0.8}
                         className={placement}
@@ -735,7 +570,7 @@ export default function PelvicHealthPage() {
 
                 <Reveal variant="fade" delay={0.3}>
                   <p className="mt-12 text-center text-[11px] uppercase tracking-[0.22em] text-deep-forest/45 sm:mt-14">
-                    Final eligibility confirmed at your consultation
+                    {c["safety.footnote"]}
                   </p>
                 </Reveal>
               </div>
@@ -750,26 +585,25 @@ export default function PelvicHealthPage() {
         >
           <div className="mx-auto max-w-[1280px]">
             <Reveal>
-              <ChapterMark number="03" label="Your Journey" />
+              <ChapterMark number="03" label={c["journey.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-10 flex flex-col gap-6 sm:mt-14 sm:flex-row sm:items-end sm:justify-between">
               <Reveal delay={0.06}>
                 <h2 className="max-w-[640px] font-serif text-[34px] leading-[1.08] tracking-[-0.012em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-                  Four steps. <span className="italic">No surprises.</span>
+                  {c["journey.heading"]}
                 </h2>
               </Reveal>
               <Reveal delay={0.12}>
                 <p className="max-w-[360px] text-[14.5px] leading-[1.65] text-deep-forest/70 sm:text-[15px]">
-                  Care that runs at the speed of conversation, never the rush
-                  of a clinic running behind.
+                  {c["journey.intro"]}
                 </p>
               </Reveal>
             </div>
 
             <div className="mt-14 grid gap-5 sm:mt-16 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
               {journey.map(({ step, title, body, icon: Icon }, i) => (
-                <Reveal key={step} delay={i * 0.09} duration={0.8}>
+                <Reveal key={i} delay={i * 0.09} duration={0.8}>
                   <div className="group flex h-full flex-col rounded-3xl border border-frost bg-warm-cream p-7 transition-all duration-500 hover:-translate-y-2 hover:border-deep-forest/15 hover:shadow-[0_28px_70px_-30px_rgba(15,42,31,0.22)] sm:p-8">
                     <div className="flex items-baseline justify-between">
                       <span className="font-serif text-[60px] leading-none text-ridge-gold sm:text-[72px]">
@@ -808,7 +642,7 @@ export default function PelvicHealthPage() {
               {/* Background image with multi-layer dark scrim for readability */}
               <div aria-hidden="true" className="absolute inset-0">
                 <Image
-                  src="/images/03.png"
+                  src={c["conditions.image"] || "/images/03.png"}
                   alt=""
                   fill
                   sizes="(max-width: 1280px) 100vw, 1280px"
@@ -826,7 +660,7 @@ export default function PelvicHealthPage() {
                     </span>
                     <span aria-hidden="true" className="h-px w-10 bg-warm-cream/30" />
                     <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-mist">
-                      Conditions Treated
+                      {c["conditions.label"]}
                     </span>
                   </div>
                 </Reveal>
@@ -834,23 +668,21 @@ export default function PelvicHealthPage() {
                 <Reveal delay={0.06}>
                   <div className="mt-7 flex flex-col gap-4 sm:mt-9 sm:flex-row sm:items-end sm:justify-between">
                     <h2 className="max-w-[600px] font-serif text-[30px] leading-[1.08] tracking-[-0.012em] text-warm-cream sm:text-[38px] lg:text-[44px]">
-                      Are you experiencing{" "}
-                      <span className="italic">any of these?</span>
+                      {c["conditions.heading"]}
                     </h2>
                     <p className="max-w-[340px] text-[13.5px] leading-[1.65] text-warm-cream/75 sm:text-[14px]">
-                      Common, quietly under-treated, and answerable with
-                      evidence-based care.
+                      {c["conditions.intro"]}
                     </p>
                   </div>
                 </Reveal>
 
                 <div className="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-                  {conditions.map((c, i) => (
-                    <Reveal key={c.title} delay={i * 0.05} duration={0.65}>
+                  {conditions.map((cond, i) => (
+                    <Reveal key={i} delay={i * 0.05} duration={0.65}>
                       <div className="group h-full rounded-2xl border border-warm-cream/15 bg-deep-forest/70 p-6 transition-colors duration-500 hover:border-warm-cream/35 hover:bg-deep-forest/85 sm:p-7">
                         <div className="flex items-center justify-between gap-3">
                           <h3 className="font-serif text-[18px] leading-tight text-warm-cream sm:text-[20px]">
-                            {c.title}
+                            {cond.title}
                           </h3>
                           <span
                             aria-hidden="true"
@@ -860,7 +692,7 @@ export default function PelvicHealthPage() {
                           </span>
                         </div>
                         <p className="mt-2.5 text-[13px] leading-[1.6] text-warm-cream/80 sm:text-[13.5px]">
-                          {c.body}
+                          {cond.body}
                         </p>
                       </div>
                     </Reveal>
@@ -878,21 +710,18 @@ export default function PelvicHealthPage() {
         >
           <div className="mx-auto max-w-[1280px]">
             <Reveal>
-              <ChapterMark number="05" label="Is It For Me" />
+              <ChapterMark number="05" label={c["fit.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-10 max-w-[680px] sm:mt-14">
               <Reveal delay={0.06}>
                 <h2 className="font-serif text-[34px] leading-[1.08] tracking-[-0.012em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-                  An honest fit check.{" "}
-                  <span className="italic">No pressure.</span>
+                  {c["fit.heading"]}
                 </h2>
               </Reveal>
               <Reveal delay={0.12}>
                 <p className="mt-6 max-w-[560px] text-[15px] leading-[1.7] text-deep-forest/75 sm:text-[16px]">
-                  We&apos;d rather have a real conversation than a quick
-                  booking. Use these as a starting point. Your consultation
-                  will get specific to you.
+                  {c["fit.intro"]}
                 </p>
               </Reveal>
             </div>
@@ -909,7 +738,7 @@ export default function PelvicHealthPage() {
                       <Check size={15} strokeWidth={2.2} />
                     </span>
                     <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-deep-forest">
-                      Likely a good fit if
+                      {c["fit.goodFitLabel"]}
                     </span>
                   </div>
                   <ul className="relative mt-7 space-y-4">
@@ -940,7 +769,7 @@ export default function PelvicHealthPage() {
                       <Plus size={14} strokeWidth={2} className="rotate-45" />
                     </span>
                     <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-deep-forest">
-                      Talk to us first if
+                      {c["fit.talkFirstLabel"]}
                     </span>
                   </div>
                   <ul className="relative mt-7 space-y-4">
@@ -958,8 +787,7 @@ export default function PelvicHealthPage() {
                     ))}
                   </ul>
                   <p className="relative mt-7 text-[12.5px] leading-[1.6] text-deep-forest/55 sm:text-[13px]">
-                    Not automatic disqualifiers. Just a closer conversation
-                    first.
+                    {c["fit.talkFirstNote"]}
                   </p>
                 </div>
               </Reveal>
@@ -974,21 +802,20 @@ export default function PelvicHealthPage() {
         >
           <div className="mx-auto max-w-[920px]">
             <Reveal>
-              <ChapterMark number="06" label="Frequently Asked" />
+              <ChapterMark number="06" label={c["faq.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-8 max-w-[640px] sm:mt-10">
               <Reveal delay={0.06}>
                 <h2 className="font-serif text-[30px] leading-[1.08] tracking-[-0.012em] text-deep-forest sm:text-[38px] lg:text-[44px]">
-                  Questions, answered{" "}
-                  <span className="italic">plainly.</span>
+                  {c["faq.heading"]}
                 </h2>
               </Reveal>
             </div>
 
             <div className="mt-10 divide-y divide-frost border-y border-frost sm:mt-12">
               {faqs.map((f, i) => (
-                <Reveal key={f.q} delay={Math.min(i * 0.03, 0.24)} duration={0.6}>
+                <Reveal key={i} delay={Math.min(i * 0.03, 0.24)} duration={0.6}>
                   <details className="group">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-4 sm:py-5">
                       <h3 className="font-serif text-[16.5px] leading-snug text-deep-forest transition-colors group-hover:text-forest sm:text-[18px]">

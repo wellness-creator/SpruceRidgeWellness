@@ -24,12 +24,8 @@ export const auth = betterAuth({
   }),
 
   advanced: {
-    cookiePrefix: APP_COOKIE_NAME, // Change this to your cookie prefix
-    crossSubDomainCookies: {
-      enabled: !isProd,
-      domain: '.shipfree.app', // Change this to your domain, if you are using a custom domain
-    },
-    useSecureCookies: !isProd,
+    cookiePrefix: APP_COOKIE_NAME,
+    useSecureCookies: isProd,
   },
 
   session: {

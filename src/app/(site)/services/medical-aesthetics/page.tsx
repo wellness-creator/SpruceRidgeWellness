@@ -28,6 +28,7 @@ import { WordReveal } from "@/components/wellness/motion/word-reveal"
 import { Counter } from "@/components/wellness/motion/counter"
 import { BeforeAfter } from "@/components/wellness/motion/before-after"
 import { Parallax, ParallaxScale } from "@/components/wellness/motion/parallax"
+import { cmsService } from "@/lib/cms/service"
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://spruceridgewellness.ca"
@@ -90,282 +91,19 @@ export const metadata: Metadata = {
   },
 }
 
-const heroChips = [
-  "Physician-Led",
-  "Health Canada Approved",
-  "Bay Roberts · St. John's",
-]
-
-const ticker = [
-  "Botox",
-  "Dermal Fillers",
-  "Plexr Skin Tightening",
-  "Skin Rejuvenation",
-  "Preventative Aesthetics",
-  "Personalized Skin Care",
-  "Anti-Aging Plans",
-  "Subtle Refinement",
-]
-
 type Tone = "mist" | "blush" | "soft-stone" | "frost" | "sage" | "forest"
 
-const stats: {
-  value: number
-  display: string
-  suffix?: string
-  label: string
-  tone: Tone
-}[] = [
-  {
-    value: 7,
-    display: "7",
-    suffix: "days",
-    label: "Until Botox softens lines",
-    tone: "blush",
-  },
-  {
-    value: 4,
-    display: "4",
-    suffix: "months",
-    label: "Average Botox duration",
-    tone: "mist",
-  },
-  {
-    value: 8,
-    display: "8",
-    suffix: "weeks",
-    label: "Until Plexr fully settles",
-    tone: "soft-stone",
-  },
-  {
-    value: 2,
-    display: "2",
-    suffix: "years",
-    label: "Typical Plexr longevity",
-    tone: "frost",
-  },
+// Card colours and icons are design, not content — kept in code, zipped with
+// the CMS text by index.
+const statTones: Tone[] = ["blush", "mist", "soft-stone", "frost"]
+const approachStyles: { icon: typeof Sparkles; tone: Tone }[] = [
+  { icon: Sparkles, tone: "blush" },
+  { icon: ClipboardList, tone: "sage" },
+  { icon: Stethoscope, tone: "forest" },
+  { icon: HeartHandshake, tone: "mist" },
 ]
-
-const approach: {
-  icon: typeof Sparkles
-  label: string
-  body: string
-  tone: Tone
-}[] = [
-  {
-    icon: Sparkles,
-    label: "Subtle First",
-    body: "Refresh, never overdo. Results that look like rest, not work.",
-    tone: "blush",
-  },
-  {
-    icon: ClipboardList,
-    label: "Plans, Not Pushes",
-    body: "Long-term aesthetic strategy, not a one-time treatment to upsell.",
-    tone: "sage",
-  },
-  {
-    icon: Stethoscope,
-    label: "Medically Grounded",
-    body: "FRCSC surgeon-led, physician-administered. Every visit.",
-    tone: "forest",
-  },
-  {
-    icon: HeartHandshake,
-    label: "Continuity of Care",
-    body: "Same physician, same plan, every visit. We grow with you.",
-    tone: "mist",
-  },
-]
-
-const journey: {
-  step: string
-  title: string
-  body: string
-  icon: typeof MessageCircle
-}[] = [
-  {
-    step: "01",
-    title: "Consult & Plan",
-    body:
-      "We sit down before we treat. Your face, your goals, your timeline, all the way through. A plan that's yours alone.",
-    icon: MessageCircle,
-  },
-  {
-    step: "02",
-    title: "Treat with Care",
-    body:
-      "Physician hands, micro-doses, and a precise touch. We do the smallest amount needed, never more than that.",
-    icon: Wand2,
-  },
-  {
-    step: "03",
-    title: "Settle & Soften",
-    body:
-      "Most patients see Botox results in three to seven days. Fillers are immediate. Plexr settles over six to eight weeks.",
-    icon: Clock,
-  },
-  {
-    step: "04",
-    title: "Maintain & Refine",
-    body:
-      "Aesthetics is a long game. We adjust gently, season by season, year by year, so you always look like yourself.",
-    icon: Calendar,
-  },
-]
-
-const treatments: {
-  icon: typeof Syringe
-  title: string
-  body: string
-}[] = [
-  {
-    icon: Syringe,
-    title: "Botox & Neuromodulators",
-    body: "Smooth expression lines and prevent new ones, with the lightest hand.",
-  },
-  {
-    icon: Droplet,
-    title: "Dermal Fillers",
-    body: "Restore volume and definition without changing your face.",
-  },
-  {
-    icon: Zap,
-    title: "Plexr Skin Tightening",
-    body: "Non-surgical lift for hooded eyes, jawline, and fine lines.",
-  },
-  {
-    icon: Leaf,
-    title: "Personalized Skin Care",
-    body: "Clinical-grade routines built around your skin, not someone else's.",
-  },
-  {
-    icon: Sparkles,
-    title: "Skin Rejuvenation",
-    body: "Targeted treatments for tone, texture, and a calmer complexion.",
-  },
-  {
-    icon: Calendar,
-    title: "Preventative Aesthetics",
-    body: "Start gently, before lines settle in. Long-term care, started early.",
-  },
-]
-
-const idealFor = [
-  "You want subtle, gradual results that still look like you",
-  "You're starting to notice fine lines and want a long-term plan",
-  "You'd rather a physician than an aesthetician do your treatments",
-  "You're considering preventative care before deeper lines settle in",
-  "You've had treatments elsewhere and want a steady, considered hand",
-  "You're tired of being upsold and just want honest, clinical advice",
-]
-
-const discussFirst = [
-  "You are pregnant or breastfeeding",
-  "You have an active skin infection at the treatment area",
-  "You have a known allergy to neuromodulators or dermal fillers",
-  "You have an autoimmune condition that affects skin healing",
-  "You take blood thinners or recently had injectables elsewhere",
-]
-
-const faqs = [
-  {
-    q: "Will I look done?",
-    a: "No. We treat with micro-doses and physician precision. The goal is refreshed, never frozen or overfilled. If you can tell someone has had something, it has been overdone.",
-  },
-  {
-    q: "How long does Botox last?",
-    a: "Three to four months on average, sometimes longer with consistent treatment. Results soften gradually rather than disappearing all at once.",
-  },
-  {
-    q: "When will I see results?",
-    a: "Botox softens lines in three to seven days. Dermal fillers are immediate. Plexr settles over six to eight weeks, with results that build over time.",
-  },
-  {
-    q: "Does it hurt?",
-    a: "Most patients describe a quick pinch. We use the finest needles and topical numbing where appropriate. Most treatments are over in fifteen to thirty minutes.",
-  },
-  {
-    q: "How much does treatment cost?",
-    a: "Pricing depends on the treatment area and product used. We provide a clear estimate at your consultation, and there is no charge for the initial conversation.",
-  },
-  {
-    q: "Is it covered by insurance?",
-    a: "Cosmetic treatments are generally not covered by provincial insurance, but some private extended health plans reimburse a portion. We provide detailed receipts.",
-  },
-  {
-    q: "Do I need a referral?",
-    a: "No. Most patients self-refer. With your consent, we can also share notes with your family physician.",
-  },
-  {
-    q: "Are both clinics offering aesthetics?",
-    a: "Yes. Botox, fillers, Plexr, and personalized skin care are available at our Bay Roberts clinic and our St. John's location at the Bense Clinic.",
-  },
-]
-
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "MedicalBusiness",
-      "@id": `${SITE_URL}/#business`,
-      name: "Spruce Ridge Wellness",
-      url: SITE_URL,
-      telephone: "+1-709-786-9150",
-      areaServed: {
-        "@type": "AdministrativeArea",
-        name: "Newfoundland and Labrador",
-      },
-    },
-    {
-      "@type": "WebPage",
-      "@id": `${SITE_URL}/services/medical-aesthetics#webpage`,
-      url: `${SITE_URL}/services/medical-aesthetics`,
-      name: "Medical Aesthetics at Spruce Ridge Wellness",
-      description:
-        "Physician-led medical aesthetics in Newfoundland: Botox, dermal fillers, Plexr skin tightening, and personalized skin care across two clinics.",
-      isPartOf: { "@id": `${SITE_URL}/#business` },
-    },
-    {
-      "@type": "MedicalProcedure",
-      name: "Medical Aesthetics",
-      url: `${SITE_URL}/services/medical-aesthetics`,
-      procedureType: "https://schema.org/CosmeticProcedure",
-      performedBy: { "@id": `${SITE_URL}/#business` },
-    },
-    {
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "Home",
-          item: SITE_URL,
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "Services",
-          item: `${SITE_URL}/services`,
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
-          name: "Medical Aesthetics",
-          item: `${SITE_URL}/services/medical-aesthetics`,
-        },
-      ],
-    },
-    {
-      "@type": "FAQPage",
-      mainEntity: faqs.map((f) => ({
-        "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
-      })),
-    },
-  ],
-}
+const journeyIcons: (typeof MessageCircle)[] = [MessageCircle, Wand2, Clock, Calendar]
+const treatmentIcons: (typeof Syringe)[] = [Syringe, Droplet, Zap, Leaf, Sparkles, Calendar]
 
 const toneSurface: Record<Tone, string> = {
   mist: "bg-mist/55",
@@ -408,7 +146,112 @@ function ChapterMark({ number, label }: { number: string; label: string }) {
   )
 }
 
-export default function MedicalAestheticsPage() {
+function splitLines(value: string): string[] {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
+function paragraphs(text: string): string[] {
+  return text
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+}
+
+export default async function MedicalAestheticsPage() {
+  const c = await cmsService.getPageContent("medical-aesthetics")
+  const headingLines = (c["hero.heading"] ?? "").split("\n")
+  const heroChips = splitLines(c["hero.chips"] ?? "")
+  const ticker = splitLines(c["ticker"] ?? "")
+  const stats = statTones.map((tone, i) => ({
+    tone,
+    value: Number(c[`stat${i + 1}.number`]) || 0,
+    suffix: c[`stat${i + 1}.suffix`] ?? "",
+    label: c[`stat${i + 1}.label`] ?? "",
+  }))
+  const approach = approachStyles.map((style, i) => ({
+    ...style,
+    label: c[`approach${i + 1}.label`] ?? "",
+    body: c[`approach${i + 1}.body`] ?? "",
+  }))
+  const journey = journeyIcons.map((icon, i) => ({
+    icon,
+    step: String(i + 1).padStart(2, "0"),
+    title: c[`journey${i + 1}.title`] ?? "",
+    body: c[`journey${i + 1}.body`] ?? "",
+  }))
+  const treatments = treatmentIcons.map((icon, i) => ({
+    icon,
+    title: c[`treatment${i + 1}.title`] ?? "",
+    body: c[`treatment${i + 1}.body`] ?? "",
+  }))
+  const idealFor = splitLines(c["fit.goodFit"] ?? "")
+  const discussFirst = splitLines(c["fit.talkFirst"] ?? "")
+  const faqs = [1, 2, 3, 4, 5, 6, 7, 8]
+    .map((n) => ({ q: c[`faq${n}.q`] ?? "", a: c[`faq${n}.a`] ?? "" }))
+    .filter((f) => f.q)
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "MedicalBusiness",
+        "@id": `${SITE_URL}/#business`,
+        name: "Spruce Ridge Wellness",
+        url: SITE_URL,
+        telephone: "+1-709-786-9150",
+        areaServed: {
+          "@type": "AdministrativeArea",
+          name: "Newfoundland and Labrador",
+        },
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${SITE_URL}/services/medical-aesthetics#webpage`,
+        url: `${SITE_URL}/services/medical-aesthetics`,
+        name: "Medical Aesthetics at Spruce Ridge Wellness",
+        description:
+          "Physician-led medical aesthetics in Newfoundland: Botox, dermal fillers, Plexr skin tightening, and personalized skin care across two clinics.",
+        isPartOf: { "@id": `${SITE_URL}/#business` },
+      },
+      {
+        "@type": "MedicalProcedure",
+        name: "Medical Aesthetics",
+        url: `${SITE_URL}/services/medical-aesthetics`,
+        procedureType: "https://schema.org/CosmeticProcedure",
+        performedBy: { "@id": `${SITE_URL}/#business` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Services",
+            item: `${SITE_URL}/services`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: "Medical Aesthetics",
+            item: `${SITE_URL}/services/medical-aesthetics`,
+          },
+        ],
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
+    ],
+  }
+
   return (
     <>
       <script
@@ -449,7 +292,7 @@ export default function MedicalAestheticsPage() {
                   </Link>
                   <span aria-hidden="true" className="h-px w-5 bg-deep-forest/30" />
                   <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-forest">
-                    Medical Aesthetics
+                    {c["hero.eyebrow"]}
                   </span>
                 </div>
               </Reveal>
@@ -458,37 +301,36 @@ export default function MedicalAestheticsPage() {
                 id="aesthetics-headline"
                 className="mt-7 max-w-[640px] font-serif text-[44px] leading-[1.02] tracking-[-0.012em] text-deep-forest sm:text-[58px] lg:text-[72px]"
               >
-                <WordReveal delay={0.1}>Aesthetics,</WordReveal>{" "}
-                <WordReveal delay={0.4} className="italic">
-                  with a physician&apos;s hand.
-                </WordReveal>
+                <WordReveal delay={0.1}>{headingLines[0] ?? ""}</WordReveal>{" "}
+                {headingLines[1] ? (
+                  <WordReveal delay={0.4} className="italic">
+                    {headingLines[1]}
+                  </WordReveal>
+                ) : null}
               </h1>
 
               <Reveal delay={0.85} duration={0.9}>
                 <p className="mt-7 max-w-[520px] text-[15.5px] leading-[1.7] text-deep-forest/75 sm:text-[17px]">
-                  Physician-led aesthetic care across Newfoundland. We listen
-                  before we treat, and the plan grows with you season by season.
-                  Two clinics: Bay&nbsp;Roberts and the Bense Clinic in
-                  St.&nbsp;John&apos;s.
+                  {c["hero.intro"]}
                 </p>
               </Reveal>
 
               <Reveal delay={0.95} duration={0.9}>
                 <div className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-5">
                   <a
-                    href="https://spruceridgewellness.janeapp.com"
+                    href={c["hero.bookUrl"] || "https://spruceridgewellness.janeapp.com"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group inline-flex items-center gap-3 rounded-full bg-ridge-gold px-7 py-4 text-[12px] font-medium uppercase tracking-[0.22em] text-warm-cream transition-all hover:gap-4 hover:bg-ridge-gold/90"
                   >
-                    Book a Consultation
+                    {c["hero.bookLabel"]}
                     <ArrowUpRight size={14} strokeWidth={1.8} />
                   </a>
                   <a
                     href="#philosophy"
                     className="group inline-flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.22em] text-deep-forest transition-all hover:gap-3"
                   >
-                    Our Approach
+                    {c["hero.secondaryLabel"]}
                     <ArrowDown
                       size={14}
                       strokeWidth={1.6}
@@ -522,7 +364,7 @@ export default function MedicalAestheticsPage() {
                     toScale={1.02}
                   >
                     <Image
-                      src="/images/medical-aesthetics.png"
+                      src={c["hero.image"] || "/images/medical-aesthetics.png"}
                       alt="Physician-led Botox treatment at Spruce Ridge Wellness in Newfoundland — Dr. Felicia Pickard, FRCSC"
                       fill
                       priority
@@ -536,12 +378,10 @@ export default function MedicalAestheticsPage() {
               <Reveal delay={0.4} duration={1}>
                 <div className="absolute -bottom-6 -left-3 hidden items-center gap-4 rounded-2xl border border-frost bg-warm-cream/95 px-5 py-4 shadow-[0_18px_60px_-30px_rgba(15,42,31,0.35)] backdrop-blur-sm sm:flex sm:-bottom-8 sm:-left-6 sm:px-6 sm:py-5">
                   <div className="font-serif text-[36px] leading-none text-deep-forest sm:text-[44px]">
-                    1:<Counter to={1} duration={1} />
+                    {c["hero.statValue"]}
                   </div>
                   <div className="text-[10.5px] uppercase tracking-[0.22em] text-deep-forest/60">
-                    Consultation always
-                    <br />
-                    one-on-one with a physician
+                    {c["hero.statLabel"]}
                   </div>
                 </div>
               </Reveal>
@@ -575,7 +415,7 @@ export default function MedicalAestheticsPage() {
         >
           <div className="mx-auto max-w-[1280px]">
             <Reveal>
-              <ChapterMark number="01" label="Overview" />
+              <ChapterMark number="01" label={c["overview.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-10 grid gap-12 lg:grid-cols-12 lg:gap-16 sm:mt-14">
@@ -583,21 +423,21 @@ export default function MedicalAestheticsPage() {
               <div className="lg:col-span-6 lg:order-1">
                 <Reveal variant="scale" duration={1}>
                   <BeforeAfter
-                    beforeSrc="/images/after.png"
-                    afterSrc="/images/before.png"
+                    beforeSrc={c["overview.beforeImage"] || "/images/after.png"}
+                    afterSrc={c["overview.afterImage"] || "/images/before.png"}
                     beforeAlt="Patient skin before personalized aesthetic treatment at Spruce Ridge Wellness in Newfoundland"
                     afterAlt="Patient skin after personalized aesthetic treatment at Spruce Ridge Wellness in Newfoundland"
-                    title="Real results."
+                    title={c["overview.compareTitle"] || "Real results."}
                     meta={[
-                      { icon: "calendar", label: "12 Weeks" },
-                      { icon: "sparkles", label: "Skin rejuvenation" },
+                      { icon: "calendar", label: c["overview.compareMeta1"] ?? "" },
+                      { icon: "sparkles", label: c["overview.compareMeta2"] ?? "" },
                     ]}
                   />
                 </Reveal>
 
                 <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-5">
                   {stats.map((s, i) => (
-                    <Reveal key={s.label} delay={i * 0.07} duration={0.7}>
+                    <Reveal key={i} delay={i * 0.07} duration={0.7}>
                       <div
                         className={`group relative h-full overflow-hidden rounded-3xl ${toneSurface[s.tone]} p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_24px_60px_-30px_rgba(15,42,31,0.25)] sm:p-7`}
                       >
@@ -644,29 +484,14 @@ export default function MedicalAestheticsPage() {
               <div className="lg:col-span-6 lg:order-2 lg:sticky lg:top-28 lg:self-start">
                 <Reveal>
                   <h2 className="font-serif text-[36px] leading-[1.05] tracking-[-0.012em] text-deep-forest sm:text-[46px] lg:text-[56px]">
-                    Look like yourself,{" "}
-                    <span className="italic">only refreshed.</span>
+                    {c["overview.heading"]}
                   </h2>
                 </Reveal>
                 <Reveal delay={0.1}>
                   <div className="mt-7 space-y-5 text-[15.5px] leading-[1.7] text-deep-forest/80 sm:text-[17px]">
-                    <p>
-                      Medical aesthetics in Newfoundland deserves the same care
-                      as any clinical decision. At Spruce Ridge, every Botox,
-                      filler, or Plexr treatment begins with a real
-                      conversation. We listen. We explain your options. We lay
-                      out a plan that fits your face, your timeline, and your
-                      life across Bay&nbsp;Roberts and St.&nbsp;John&apos;s.
-                    </p>
-                    <p>
-                      We do not chase trends. We do not sell packages. We work
-                      with the face you already have, soften what bothers you,
-                      and protect what makes you, you. The goal is always
-                      refreshed, never &quot;done&quot;. You walk out of our
-                      Bay&nbsp;Roberts clinic or our St.&nbsp;John&apos;s
-                      location at the Bense Clinic looking rested, not
-                      retouched.
-                    </p>
+                    {paragraphs(c["overview.body"] ?? "").map((p, i) => (
+                      <p key={i}>{p}</p>
+                    ))}
                   </div>
                 </Reveal>
               </div>
@@ -681,7 +506,6 @@ export default function MedicalAestheticsPage() {
         >
           <div className="mx-auto max-w-[1400px]">
             <div className="relative overflow-hidden rounded-[32px] bg-blush/60 px-6 py-16 sm:rounded-[40px] sm:px-12 sm:py-20 lg:px-16 lg:py-24">
-              {/* atmospheric gradients */}
               <span
                 aria-hidden="true"
                 className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-ridge-gold/15 blur-3xl"
@@ -693,19 +517,18 @@ export default function MedicalAestheticsPage() {
 
               <div className="relative">
                 <Reveal>
-                  <ChapterMark number="02" label="Our Approach" />
+                  <ChapterMark number="02" label={c["approach.label"] ?? ""} />
                 </Reveal>
 
                 <div className="mt-8 max-w-[760px] sm:mt-10">
                   <Reveal delay={0.06}>
                     <h2 className="font-serif text-[34px] leading-[1.05] tracking-[-0.012em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-                      Subtle, considered,{" "}
-                      <span className="italic">physician-led.</span>
+                      {c["approach.heading"]}
                     </h2>
                   </Reveal>
                   <Reveal delay={0.12}>
                     <p className="mt-6 max-w-[480px] text-[15px] leading-[1.7] text-deep-forest/75 sm:text-[16px]">
-                      Four principles behind every treatment at Spruce Ridge.
+                      {c["approach.intro"]}
                     </p>
                   </Reveal>
                 </div>
@@ -723,7 +546,7 @@ export default function MedicalAestheticsPage() {
                           toScale={1.02}
                         >
                           <Image
-                            src="/images/Botox.png"
+                            src={c["approach.image"] || "/images/Botox.png"}
                             alt="Physician-administered Botox treatment in progress at Spruce Ridge Wellness in Newfoundland"
                             fill
                             sizes="(max-width: 1024px) 100vw, 30vw"
@@ -743,7 +566,7 @@ export default function MedicalAestheticsPage() {
                     ][i]
                     return (
                       <Reveal
-                        key={label}
+                        key={i}
                         delay={0.06 + i * 0.07}
                         duration={0.8}
                         className={placement}
@@ -786,7 +609,7 @@ export default function MedicalAestheticsPage() {
 
                 <Reveal variant="fade" delay={0.3}>
                   <p className="mt-12 text-center text-[11px] uppercase tracking-[0.22em] text-deep-forest/45 sm:mt-14">
-                    Every plan is built treatment by treatment, never as a package
+                    {c["approach.footnote"]}
                   </p>
                 </Reveal>
               </div>
@@ -801,26 +624,25 @@ export default function MedicalAestheticsPage() {
         >
           <div className="mx-auto max-w-[1280px]">
             <Reveal>
-              <ChapterMark number="03" label="Your Journey" />
+              <ChapterMark number="03" label={c["journey.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-10 flex flex-col gap-6 sm:mt-14 sm:flex-row sm:items-end sm:justify-between">
               <Reveal delay={0.06}>
                 <h2 className="max-w-[640px] font-serif text-[34px] leading-[1.08] tracking-[-0.012em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-                  Four steps. <span className="italic">No pressure.</span>
+                  {c["journey.heading"]}
                 </h2>
               </Reveal>
               <Reveal delay={0.12}>
                 <p className="max-w-[360px] text-[14.5px] leading-[1.65] text-deep-forest/70 sm:text-[15px]">
-                  Aesthetic care that runs at the speed of conversation, never
-                  the rush of an appointment slot.
+                  {c["journey.intro"]}
                 </p>
               </Reveal>
             </div>
 
             <div className="mt-14 grid gap-5 sm:mt-16 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
               {journey.map(({ step, title, body, icon: Icon }, i) => (
-                <Reveal key={step} delay={i * 0.09} duration={0.8}>
+                <Reveal key={i} delay={i * 0.09} duration={0.8}>
                   <div className="group flex h-full flex-col rounded-3xl border border-frost bg-warm-cream p-7 transition-all duration-500 hover:-translate-y-2 hover:border-deep-forest/15 hover:shadow-[0_28px_70px_-30px_rgba(15,42,31,0.22)] sm:p-8">
                     <div className="flex items-baseline justify-between">
                       <span className="font-serif text-[60px] leading-none text-ridge-gold sm:text-[72px]">
@@ -860,7 +682,7 @@ export default function MedicalAestheticsPage() {
               <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
                 <Parallax className="absolute inset-0" from={-50} to={50}>
                   <Image
-                    src="/images/botox arm .png"
+                    src={c["treatments.image"] || "/images/botox arm .png"}
                     alt=""
                     fill
                     sizes="(max-width: 1280px) 100vw, 1280px"
@@ -879,7 +701,7 @@ export default function MedicalAestheticsPage() {
                     </span>
                     <span aria-hidden="true" className="h-px w-10 bg-warm-cream/30" />
                     <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-mist">
-                      Treatments Offered
+                      {c["treatments.label"]}
                     </span>
                   </div>
                 </Reveal>
@@ -887,19 +709,17 @@ export default function MedicalAestheticsPage() {
                 <Reveal delay={0.06}>
                   <div className="mt-7 flex flex-col gap-4 sm:mt-9 sm:flex-row sm:items-end sm:justify-between">
                     <h2 className="max-w-[600px] font-serif text-[30px] leading-[1.08] tracking-[-0.012em] text-warm-cream sm:text-[38px] lg:text-[44px]">
-                      Treatments,{" "}
-                      <span className="italic">tailored to you.</span>
+                      {c["treatments.heading"]}
                     </h2>
                     <p className="max-w-[340px] text-[13.5px] leading-[1.65] text-warm-cream/75 sm:text-[14px]">
-                      Built treatment by treatment, never as a package. Every
-                      plan starts with a conversation.
+                      {c["treatments.intro"]}
                     </p>
                   </div>
                 </Reveal>
 
                 <div className="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                   {treatments.map(({ icon: Icon, title, body }, i) => (
-                    <Reveal key={title} delay={i * 0.05} duration={0.65}>
+                    <Reveal key={i} delay={i * 0.05} duration={0.65}>
                       <div className="group h-full rounded-2xl border border-warm-cream/15 bg-deep-forest/70 p-6 transition-colors duration-500 hover:border-warm-cream/35 hover:bg-deep-forest/85 sm:p-7">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
@@ -936,21 +756,18 @@ export default function MedicalAestheticsPage() {
         >
           <div className="mx-auto max-w-[1280px]">
             <Reveal>
-              <ChapterMark number="05" label="Is It For Me" />
+              <ChapterMark number="05" label={c["fit.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-10 max-w-[680px] sm:mt-14">
               <Reveal delay={0.06}>
                 <h2 className="font-serif text-[34px] leading-[1.08] tracking-[-0.012em] text-deep-forest sm:text-[44px] lg:text-[52px]">
-                  An honest fit check.{" "}
-                  <span className="italic">No pressure.</span>
+                  {c["fit.heading"]}
                 </h2>
               </Reveal>
               <Reveal delay={0.12}>
                 <p className="mt-6 max-w-[560px] text-[15px] leading-[1.7] text-deep-forest/75 sm:text-[16px]">
-                  We&apos;d rather have a real conversation than a quick
-                  booking. Use these as a starting point. Your consultation
-                  will get specific to you.
+                  {c["fit.intro"]}
                 </p>
               </Reveal>
             </div>
@@ -967,7 +784,7 @@ export default function MedicalAestheticsPage() {
                       <Check size={15} strokeWidth={2.2} />
                     </span>
                     <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-deep-forest">
-                      Likely a good fit if
+                      {c["fit.goodFitLabel"]}
                     </span>
                   </div>
                   <ul className="relative mt-7 space-y-4">
@@ -998,7 +815,7 @@ export default function MedicalAestheticsPage() {
                       <Plus size={14} strokeWidth={2} className="rotate-45" />
                     </span>
                     <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-deep-forest">
-                      Talk to us first if
+                      {c["fit.talkFirstLabel"]}
                     </span>
                   </div>
                   <ul className="relative mt-7 space-y-4">
@@ -1016,8 +833,7 @@ export default function MedicalAestheticsPage() {
                     ))}
                   </ul>
                   <p className="relative mt-7 text-[12.5px] leading-[1.6] text-deep-forest/55 sm:text-[13px]">
-                    Not automatic disqualifiers. Just a closer conversation
-                    first.
+                    {c["fit.talkFirstNote"]}
                   </p>
                 </div>
               </Reveal>
@@ -1032,21 +848,20 @@ export default function MedicalAestheticsPage() {
         >
           <div className="mx-auto max-w-[920px]">
             <Reveal>
-              <ChapterMark number="06" label="Frequently Asked" />
+              <ChapterMark number="06" label={c["faq.label"] ?? ""} />
             </Reveal>
 
             <div className="mt-8 max-w-[640px] sm:mt-10">
               <Reveal delay={0.06}>
                 <h2 className="font-serif text-[30px] leading-[1.08] tracking-[-0.012em] text-deep-forest sm:text-[38px] lg:text-[44px]">
-                  Questions, answered{" "}
-                  <span className="italic">plainly.</span>
+                  {c["faq.heading"]}
                 </h2>
               </Reveal>
             </div>
 
             <div className="mt-10 divide-y divide-frost border-y border-frost sm:mt-12">
               {faqs.map((f, i) => (
-                <Reveal key={f.q} delay={Math.min(i * 0.03, 0.24)} duration={0.6}>
+                <Reveal key={i} delay={Math.min(i * 0.03, 0.24)} duration={0.6}>
                   <details className="group">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-4 sm:py-5">
                       <h3 className="font-serif text-[16.5px] leading-snug text-deep-forest transition-colors group-hover:text-forest sm:text-[18px]">

@@ -1,5 +1,16 @@
 import { relations } from 'drizzle-orm'
-import { pgTable, text, timestamp, boolean, index, decimal } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  index,
+  decimal,
+  uuid,
+  jsonb,
+  integer,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -7,6 +18,9 @@ export const user = pgTable('user', {
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   image: text('image'),
+  role: text('role', { enum: ['user', 'admin'] })
+    .notNull()
+    .default('user'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()
@@ -238,3 +252,85 @@ export const paymentRelations = relations(payment, ({ one }) => ({
     references: [subscription.id],
   }),
 }))
+
+// ─── CMS ─────────────────────────────────────────────────────────────
+export const cmsPage = pgTable('cms_page', {
+  slug: text('slug').primaryKey(),
+  label: text('label').notNull(),
+  description: text('description'),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedBy: text('updated_by').references(() => user.id),
+})
+
+export const cmsPageField = pgTable(
+  'cms_page_field',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    pageSlug: text('page_slug')
+      .notNull()
+      .references(() => cmsPage.slug, { onDelete: 'cascade' }),
+    fieldKey: text('field_key').notNull(),
+    fieldType: text('field_type', {
+      enum: ['text', 'textarea', 'richText', 'image', 'url', 'boolean', 'number'],
+    }).notNull(),
+    valueEn: text('value_en'),
+    valueFr: text('value_fr'),
+    valueImage: text('value_image'),
+    valueUrl: text('value_url'),
+    valueBool: boolean('value_bool'),
+    valueNum: integer('value_num'),
+    sortOrder: integer('sort_order').notNull().default(0),
+  },
+  (t) => [uniqueIndex('cms_page_field_unique').on(t.pageSlug, t.fieldKey)]
+)
+
+export const cmsCollection = pgTable('cms_collection', {
+  slug: text('slug').primaryKey(),
+  label: text('label').notNull(),
+  description: text('description'),
+  itemSchema: jsonb('item_schema').notNull(),
+})
+
+export const cmsCollectionItem = pgTable('cms_collection_item', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  collectionSlug: text('collection_slug')
+    .notNull()
+    .references(() => cmsCollection.slug, { onDelete: 'cascade' }),
+  sortOrder: integer('sort_order').notNull().default(0),
+  isPublished: boolean('is_published').notNull().default(true),
+  data: jsonb('data').notNull(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  updatedBy: text('updated_by').references(() => user.id),
+})
+
+export const siteSettings = pgTable('site_settings', {
+  id: text('id').primaryKey().default('singleton'),
+  siteName: text('site_name').notNull(),
+  about: text('about'),
+  contactEmail: text('contact_email'),
+  contactPhone: text('contact_phone'),
+  address: text('address'),
+  socials: jsonb('socials'),
+  defaultOgImage: text('default_og_image'),
+  announcementText: text('announcement_text'),
+  announcementLinkLabel: text('announcement_link_label'),
+  announcementLink: text('announcement_link'),
+  announcementEnabled: boolean('announcement_enabled').notNull().default(true),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
+
+// Snapshot of a page's field values taken just before each save, so the
+// dashboard can step a page back to an earlier version (undo).
+export const cmsPageVersion = pgTable(
+  'cms_page_version',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    pageSlug: text('page_slug')
+      .notNull()
+      .references(() => cmsPage.slug, { onDelete: 'cascade' }),
+    data: jsonb('data').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    createdBy: text('created_by').references(() => user.id),
+  },
+  (t) => [index('cms_page_version_page_idx').on(t.pageSlug, t.createdAt)]
+)

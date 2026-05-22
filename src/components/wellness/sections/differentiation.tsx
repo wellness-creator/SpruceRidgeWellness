@@ -19,6 +19,8 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
+import type { HomeWhyContent } from "@/lib/cms/schema"
+
 type Pillar = {
   number: string
   title: string
@@ -27,36 +29,9 @@ type Pillar = {
   image: string
 }
 
-const pillars: Pillar[] = [
-  {
-    number: "01",
-    title: "Surgeon-Led",
-    body: "Real surgical training, applied with the patience of a private practice. The rigor of a hospital, without the rush.",
-    icon: Stethoscope,
-    image: "/images/surgeon-led.png",
-  },
-  {
-    number: "02",
-    title: "Locally Rooted",
-    body: "World-class technology, right here in Newfoundland. Care that was previously only available in major urban centres.",
-    icon: MapPin,
-    image: "/images/nature.jpg",
-  },
-  {
-    number: "03",
-    title: "Science-First",
-    body: "Evidence-based recommendations only. Health Canada approved technology over trends. Research over hype.",
-    icon: FlaskConical,
-    image: "/images/science.png",
-  },
-  {
-    number: "04",
-    title: "Stigma-Free",
-    body: "A safe, judgment-free space for open conversation. No question is too small. No concern is too personal.",
-    icon: HeartHandshake,
-    image: "/images/stigma.png",
-  },
-]
+// Icons are design, not content — kept in code, paired with CMS text by index.
+const pillarIcons: LucideIcon[] = [Stethoscope, MapPin, FlaskConical, HeartHandshake]
+const bulletIcons: LucideIcon[] = [BadgeCheck, Stethoscope, HeartHandshake]
 
 // Scroll budget — pillars enter sequentially, then exit together, then the
 // Meet Dr. Pickard slide rises into the same stage.
@@ -117,12 +92,7 @@ function PillarCard({ pillar, index, progress }: PillarCardProps) {
 
       {/* Content */}
       <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
-        <Icon
-          size={24}
-          strokeWidth={1.1}
-          className="text-sage"
-          aria-hidden
-        />
+        <Icon size={24} strokeWidth={1.1} className="text-sage" aria-hidden />
         <div>
           <h3 className="font-serif text-[24px] leading-[1.05] tracking-[-0.005em] text-deep-forest sm:text-[26px] lg:text-[28px]">
             {pillar.title}
@@ -138,9 +108,10 @@ function PillarCard({ pillar, index, progress }: PillarCardProps) {
 
 type MeetDoctorSlideProps = {
   progress: MotionValue<number>
+  doctor: HomeWhyContent["doctor"]
 }
 
-function MeetDoctorSlide({ progress }: MeetDoctorSlideProps) {
+function MeetDoctorSlide({ progress, doctor }: MeetDoctorSlideProps) {
   // Enters from below the viewport, settles, then layered sub-elements fade in.
   const y = useTransform(
     progress,
@@ -189,11 +160,10 @@ function MeetDoctorSlide({ progress }: MeetDoctorSlideProps) {
     [0, 1],
   )
 
-  const bullets = [
-    { icon: BadgeCheck, text: "FRCSC-certified general surgeon" },
-    { icon: Stethoscope, text: "Surgical-grade clinical assessment" },
-    { icon: HeartHandshake, text: "Care at the pace of conversation" },
-  ]
+  const bullets = doctor.bullets.map((text, i) => ({
+    icon: bulletIcons[i] ?? BadgeCheck,
+    text,
+  }))
 
   return (
     <motion.div
@@ -204,8 +174,8 @@ function MeetDoctorSlide({ progress }: MeetDoctorSlideProps) {
         {/* Portrait card with name overlay */}
         <div className="relative aspect-[5/6] w-full overflow-hidden rounded-[32px] bg-soft-stone">
           <Image
-            src="/images/dr-felicia.png"
-            alt="Dr. Felicia Pickard, founder of Spruce Ridge Wellness"
+            src={doctor.image || "/images/dr-felicia.png"}
+            alt={doctor.name}
             fill
             sizes="(max-width: 1024px) 100vw, 45vw"
             className="object-cover object-top"
@@ -216,10 +186,10 @@ function MeetDoctorSlide({ progress }: MeetDoctorSlideProps) {
             className="absolute inset-x-5 bottom-5 rounded-2xl bg-deep-forest/55 p-5 backdrop-blur-md sm:inset-x-6 sm:bottom-6 sm:p-6"
           >
             <h4 className="font-serif text-[22px] leading-[1.05] text-warm-cream sm:text-[26px]">
-              Dr. Felicia Pickard
+              {doctor.name}
             </h4>
             <p className="mt-1.5 text-[10.5px] uppercase tracking-[0.22em] text-warm-cream/75">
-              FRCSC General Surgeon
+              {doctor.role}
             </p>
           </motion.div>
         </div>
@@ -231,12 +201,9 @@ function MeetDoctorSlide({ progress }: MeetDoctorSlideProps) {
             style={{ opacity: eyebrowOpacity }}
             className="inline-flex items-center gap-2 self-start rounded-full bg-soft-stone px-4 py-2"
           >
-            <span
-              aria-hidden
-              className="h-1.5 w-1.5 rounded-full bg-forest"
-            />
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-forest" />
             <span className="text-[10.5px] font-medium uppercase tracking-[0.22em] text-deep-forest">
-              Meet Dr. Pickard
+              {doctor.eyebrow}
             </span>
           </motion.div>
 
@@ -245,8 +212,7 @@ function MeetDoctorSlide({ progress }: MeetDoctorSlideProps) {
             style={{ opacity: headingOpacity, y: headingY }}
             className="mt-6 max-w-[560px] font-serif text-[36px] leading-[1.02] tracking-[-0.01em] text-deep-forest sm:text-[48px] lg:text-[60px]"
           >
-            A surgeon committed{" "}
-            <span className="italic">to listening.</span>
+            {doctor.heading}
           </motion.h3>
 
           {/* Body */}
@@ -254,28 +220,17 @@ function MeetDoctorSlide({ progress }: MeetDoctorSlideProps) {
             style={{ opacity: bodyOpacity }}
             className="mt-6 max-w-[520px] text-[14.5px] leading-[1.65] text-deep-forest/70 sm:text-[15.5px]"
           >
-            Dr. Felicia Pickard is a practicing general surgeon with firsthand
-            experience treating pelvic floor conditions. She built Spruce
-            Ridge Wellness to bring surgical expertise and wellness-first
-            care to women across Newfoundland.
+            {doctor.body}
           </motion.p>
 
           {/* Bullet list with icon badges */}
-          <motion.ul
-            style={{ opacity: bulletsOpacity }}
-            className="mt-8 space-y-3"
-          >
+          <motion.ul style={{ opacity: bulletsOpacity }} className="mt-8 space-y-3">
             {bullets.map((b) => {
               const Icon = b.icon
               return (
                 <li key={b.text} className="flex items-center gap-4">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-warm-cream shadow-[0_6px_18px_-8px_rgba(15,42,31,0.22)]">
-                    <Icon
-                      size={18}
-                      strokeWidth={1.4}
-                      className="text-forest"
-                      aria-hidden
-                    />
+                    <Icon size={18} strokeWidth={1.4} className="text-forest" aria-hidden />
                   </span>
                   <span className="text-[14px] text-deep-forest sm:text-[15px]">
                     {b.text}
@@ -298,7 +253,7 @@ function MeetDoctorSlide({ progress }: MeetDoctorSlideProps) {
                   className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                 />
               </span>
-              More about Dr. Pickard
+              {doctor.ctaLabel}
             </Link>
           </motion.div>
         </div>
@@ -307,12 +262,20 @@ function MeetDoctorSlide({ progress }: MeetDoctorSlideProps) {
   )
 }
 
-export function Differentiation() {
+export function Differentiation({ content }: { content: HomeWhyContent }) {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
   })
+
+  const pillars: Pillar[] = content.pillars.map((p, i) => ({
+    number: `0${i + 1}`,
+    title: p.title,
+    body: p.body,
+    image: p.image,
+    icon: pillarIcons[i] ?? Stethoscope,
+  }))
 
   return (
     <section
@@ -352,13 +315,12 @@ export function Differentiation() {
           >
             <div className="flex items-center gap-3">
               <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-forest">
-                What Sets Us Apart
+                {content.eyebrow}
               </span>
               <span aria-hidden className="h-px w-10 bg-ridge-gold/70" />
             </div>
             <h2 className="mt-5 font-serif text-[36px] leading-[1.04] tracking-[-0.01em] text-deep-forest sm:text-[48px] lg:text-[58px]">
-              The pieces,{" "}
-              <span className="italic">brought together.</span>
+              {content.heading}
             </h2>
           </motion.div>
         </div>
@@ -368,7 +330,7 @@ export function Differentiation() {
           <div className="flex items-center gap-4 sm:gap-5 lg:gap-6">
             {pillars.map((pillar, i) => (
               <PillarCard
-                key={pillar.title}
+                key={pillar.number}
                 pillar={pillar}
                 index={i}
                 progress={scrollYProgress}
@@ -378,7 +340,7 @@ export function Differentiation() {
         </div>
 
         {/* Doctor takeover slide */}
-        <MeetDoctorSlide progress={scrollYProgress} />
+        <MeetDoctorSlide progress={scrollYProgress} doctor={content.doctor} />
       </div>
     </section>
   )

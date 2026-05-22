@@ -13,7 +13,9 @@
     "biome:check": "biome check",
     "generate-migration": "drizzle-kit generate",
     "migrate:local": "bun run ./scripts/migrate.ts",
-    "migrate:prod": "cross-env NODE_ENV=production bun run ./scripts/migrate.ts"
+    "migrate:prod": "cross-env NODE_ENV=production bun run ./scripts/migrate.ts",
+    "seed:cms": "bun run ./scripts/seed-cms.ts",
+    "bootstrap": "bun run ./scripts/bootstrap.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",

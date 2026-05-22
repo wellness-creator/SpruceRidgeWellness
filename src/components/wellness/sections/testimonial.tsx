@@ -5,32 +5,7 @@ import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 
-const quotes = [
-  {
-    quote:
-      "I can laugh, sneeze, and jump with my kids without worrying. Dr. Pickard made me feel comfortable from the very first visit.",
-    name: "Spruce Ridge Patient",
-    location: "Pelvic Health · Bay Roberts",
-  },
-  {
-    quote:
-      "After two children I had given up hope of feeling like myself again. A few sessions later, I have my confidence back.",
-    name: "Spruce Ridge Patient",
-    location: "Postpartum Care · Bay Roberts",
-  },
-  {
-    quote:
-      "Compassionate, professional, and grounded in real surgical expertise. This is exactly what Newfoundland needed.",
-    name: "Spruce Ridge Patient",
-    location: "Medical Aesthetics · St. John's",
-  },
-  {
-    quote:
-      "Finally a clinic that treats women's health like real medicine. Clear answers, no judgment, and a plan that actually worked.",
-    name: "Spruce Ridge Patient",
-    location: "Women's Wellness · St. John's",
-  },
-]
+import type { HomeTestimonialsContent, TestimonialItem } from "@/lib/cms/schema"
 
 function Star() {
   return (
@@ -47,9 +22,17 @@ function Star() {
   )
 }
 
-type Quote = (typeof quotes)[number]
+function renderMultiline(value: string) {
+  const lines = value.split("\n")
+  return lines.map((line, i) => (
+    <span key={i}>
+      {line}
+      {i < lines.length - 1 ? <br /> : null}
+    </span>
+  ))
+}
 
-function PatientCard({ data }: { data: Quote }) {
+function PatientCard({ data }: { data: TestimonialItem }) {
   return (
     <article className="flex h-full flex-col rounded-[20px] bg-card p-7 shadow-[0_1px_2px_rgba(15,42,31,0.04),0_8px_24px_-12px_rgba(15,42,31,0.08)] sm:p-8">
       <div className="mb-5 flex items-center gap-1">
@@ -76,9 +59,7 @@ function PatientCard({ data }: { data: Quote }) {
           />
         </div>
         <div className="leading-tight">
-          <div className="text-[13px] font-medium text-deep-forest">
-            {data.name}
-          </div>
+          <div className="text-[13px] font-medium text-deep-forest">{data.name}</div>
           <div className="mt-0.5 text-[11px] tracking-[0.06em] text-deep-forest/55">
             {data.location}
           </div>
@@ -88,18 +69,26 @@ function PatientCard({ data }: { data: Quote }) {
   )
 }
 
-export function Testimonial() {
+export function Testimonial({
+  items,
+  content,
+}: {
+  items: TestimonialItem[]
+  content: HomeTestimonialsContent
+}) {
   const [index, setIndex] = useState(0)
   const [direction, setDirection] = useState(0)
-  const total = quotes.length
+  const total = items.length
+
+  if (total === 0) return null
 
   const change = (dir: number) => {
     setDirection(dir)
     setIndex((i) => (i + dir + total) % total)
   }
 
-  const a = quotes[index]
-  const b = quotes[(index + 1) % total]
+  const a = items[index]
+  const b = items[(index + 1) % total]
 
   const arrowBtn =
     "flex h-11 w-11 items-center justify-center rounded-full bg-card text-deep-forest/70 shadow-[0_1px_2px_rgba(15,42,31,0.06)] transition-all hover:text-deep-forest hover:shadow-[0_2px_8px_rgba(15,42,31,0.1)]"
@@ -112,9 +101,7 @@ export function Testimonial() {
           <div className="flex flex-col">
             <div className="flex items-start justify-between gap-6">
               <h2 className="font-serif text-[40px] leading-[1.05] tracking-[-0.015em] text-deep-forest sm:text-[52px] lg:text-[64px]">
-                What our
-                <br />
-                patients say
+                {renderMultiline(content.heading)}
               </h2>
               <div className="mt-3 hidden shrink-0 items-center gap-2 sm:flex">
                 <button
@@ -177,7 +164,7 @@ export function Testimonial() {
           <div className="flex flex-col gap-4">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] lg:aspect-auto lg:flex-1 lg:min-h-[480px]">
               <Image
-                src="/images/Patients.png"
+                src={content.image}
                 alt=""
                 fill
                 sizes="(min-width: 1024px) 36vw, 100vw"
@@ -188,16 +175,14 @@ export function Testimonial() {
             <div className="flex items-center justify-between gap-4 rounded-[16px] bg-card px-5 py-4 shadow-[0_1px_2px_rgba(15,42,31,0.04),0_8px_24px_-12px_rgba(15,42,31,0.08)] sm:px-6">
               <div>
                 <div className="text-[10px] uppercase tracking-[0.22em] text-deep-forest/65">
-                  Practicing in
+                  {content.practicingLabel}
                 </div>
                 <div className="mt-1 font-serif text-[18px] leading-tight tracking-[-0.01em] text-deep-forest sm:text-[20px]">
-                  Bay Roberts &middot; St. John&rsquo;s
+                  {content.locations}
                 </div>
               </div>
               <div className="hidden text-right text-[11px] tracking-[0.04em] text-deep-forest/55 sm:block">
-                Two clinics,
-                <br />
-                one practice
+                {renderMultiline(content.tagline)}
               </div>
             </div>
           </div>

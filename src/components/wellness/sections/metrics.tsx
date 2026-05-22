@@ -4,6 +4,8 @@ import Image from "next/image"
 import { motion, useInView } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 
+import type { HomeNumbersContent } from "@/lib/cms/schema"
+
 // Animates a numeric string ("95", "11K", "28") from 0 → final value when
 // scrolled into view. Splits the string into a numeric part and an optional
 // trailing letter (K/M), so "11K" counts 0 → 11K with the K appended.
@@ -38,6 +40,10 @@ function CountUp({
     return () => cancelAnimationFrame(frame)
   }, [inView, targetNum, duration])
 
+  // If the value isn't a plain number ("11K" still works; "n/a" wouldn't),
+  // fall back to showing it as-is.
+  if (!match) return <span ref={ref}>{value}</span>
+
   return (
     <span ref={ref}>
       {count}
@@ -46,28 +52,7 @@ function CountUp({
   )
 }
 
-const supportingStats = [
-  {
-    value: "28",
-    suffix: "min",
-    label: "Per Session",
-    desc: "Fully clothed, no recovery time.",
-  },
-  {
-    value: "11K",
-    suffix: "+",
-    label: "Pelvic Contractions",
-    desc: "Equivalent strength, in one session.",
-  },
-  {
-    value: "6",
-    suffix: "",
-    label: "Total Visits",
-    desc: "Spread comfortably over three weeks.",
-  },
-]
-
-export function Metrics() {
+export function Metrics({ content }: { content: HomeNumbersContent }) {
   return (
     <section className="relative bg-warm-cream py-24 sm:py-32">
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
@@ -82,24 +67,22 @@ export function Metrics() {
           <div>
             <div className="flex items-center gap-3">
               <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-forest">
-                The Numbers
+                {content.eyebrow}
               </span>
               <span aria-hidden className="h-px w-10 bg-ridge-gold/70" />
             </div>
             <h2 className="mt-5 max-w-[600px] font-serif text-[36px] leading-[1.04] tracking-[-0.01em] text-deep-forest sm:text-[46px] lg:text-[54px]">
-              Real results,{" "}
-              <span className="italic">measured carefully.</span>
+              {content.heading}
             </h2>
           </div>
           <p className="max-w-[440px] text-[15px] leading-[1.7] text-deep-forest/70">
-            Outcomes drawn from clinical research and the lived experience of
-            hundreds of women across Newfoundland. Not marketing claims.
+            {content.intro}
           </p>
         </motion.div>
 
         {/* Featured + supporting */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.35fr_1fr]">
-          {/* Featured 95% stat */}
+          {/* Featured stat */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -120,19 +103,18 @@ export function Metrics() {
             <div className="relative flex h-full flex-col justify-between gap-12">
               <div className="flex items-baseline gap-1">
                 <span className="font-serif leading-[0.85] tracking-[-0.03em] text-deep-forest text-[120px] sm:text-[160px] lg:text-[200px]">
-                  <CountUp value="95" duration={1700} />
+                  <CountUp value={content.featured.value} duration={1700} />
                 </span>
                 <span className="font-serif leading-none text-ridge-gold text-[60px] sm:text-[80px] lg:text-[96px]">
-                  %
+                  {content.featured.suffix}
                 </span>
               </div>
               <div className="max-w-md">
                 <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-deep-forest">
-                  Improvement in Quality of Life
+                  {content.featured.label}
                 </span>
                 <p className="mt-3 text-[14px] leading-[1.65] text-deep-forest/65 sm:text-[15px]">
-                  Reported by pelvic floor therapy patients across published
-                  BTL Emsella clinical studies.
+                  {content.featured.desc}
                 </p>
               </div>
             </div>
@@ -140,9 +122,9 @@ export function Metrics() {
 
           {/* Supporting stats */}
           <div className="grid grid-cols-1 gap-3">
-            {supportingStats.map((s, idx) => (
+            {content.metrics.map((s, idx) => (
               <motion.div
-                key={s.label}
+                key={idx}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
@@ -182,7 +164,7 @@ export function Metrics() {
             <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-1 ring-frost">
               <Image
                 src="/images/dr-felicia.png"
-                alt="Dr. Felicia Pickard"
+                alt={content.signatureName}
                 fill
                 sizes="48px"
                 className="object-cover"
@@ -190,17 +172,16 @@ export function Metrics() {
             </div>
             <div className="flex flex-col">
               <span className="font-serif text-[15px] text-deep-forest">
-                Dr. Felicia Pickard
+                {content.signatureName}
               </span>
               <span className="text-[10.5px] uppercase tracking-[0.22em] text-deep-forest/55">
-                FRCSC General Surgeon
+                {content.signatureRole}
               </span>
             </div>
           </div>
           <span aria-hidden className="hidden h-8 w-px bg-frost sm:block" />
           <p className="max-w-md text-[12px] italic leading-[1.55] text-deep-forest/55">
-            Each treatment plan is built around your assessment and goals at
-            your first consultation.
+            {content.signatureNote}
           </p>
         </motion.div>
       </div>
