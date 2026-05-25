@@ -10,8 +10,14 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL is required. Please set it in your .env file.')
 }
 
-// Supabase's pooler caps total clients, so keep each process's pool small and
-// release idle connections promptly.
-const queryClient = postgres(databaseUrl, { max: 5, idle_timeout: 20 })
+// On Vercel each serverless instance gets its own pool. Use Supabase's
+// transaction-mode pooler (port 6543) with max:1 and prepare:false so we
+// don't exhaust the upstream connection cap.
+const queryClient = postgres(databaseUrl, {
+  max: 1,
+  idle_timeout: 20,
+  connect_timeout: 10,
+  prepare: false,
+})
 
 export const db = drizzle({ client: queryClient, schema })
