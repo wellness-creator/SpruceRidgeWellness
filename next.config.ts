@@ -1,12 +1,33 @@
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
+const supabaseHost = (() => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!url) return null
+  try {
+    return new URL(url).hostname
+  } catch {
+    return null
+  }
+})()
+
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker optimization
   // This reduces the Docker image size by including only necessary files
   // output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
+  },
+  images: {
+    remotePatterns: supabaseHost
+      ? [
+          {
+            protocol: 'https',
+            hostname: supabaseHost,
+            pathname: '/storage/v1/object/public/**',
+          },
+        ]
+      : [],
   },
 }
 

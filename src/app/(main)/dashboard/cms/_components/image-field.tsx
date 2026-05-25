@@ -5,9 +5,19 @@ import Image from 'next/image'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { env } from '@/config/env'
 
 const DEFAULT_RATIO_HINT =
   'Portrait photo (taller than wide) — about 1000 × 1250 px works best.'
+
+function buildPreviewUrl(value: string): string | null {
+  if (!value) return null
+  if (value.startsWith('/') || value.startsWith('http')) return value
+  const base = env.NEXT_PUBLIC_SUPABASE_URL
+  const bucket = env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET
+  if (!base) return null
+  return `${base}/storage/v1/object/public/${bucket}/${value}`
+}
 
 export function ImageField({
   name,
@@ -47,7 +57,7 @@ export function ImageField({
     }
   }
 
-  const preview = value.startsWith('/') || value.startsWith('http') ? value : null
+  const preview = buildPreviewUrl(value)
 
   return (
     <div className='space-y-2'>
@@ -66,7 +76,7 @@ export function ImageField({
         name={name}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder='/images/example.jpg'
+        placeholder='cms/abc-123.jpg or paste a URL'
       />
       <div className='flex flex-wrap items-center gap-3'>
         <input

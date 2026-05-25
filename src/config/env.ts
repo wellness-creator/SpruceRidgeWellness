@@ -13,14 +13,9 @@ export const env = createEnv({
     // Optional: Sentry
     SENTRY_DSN: z.string().optional(),
 
-    // Optional: Cloudflare R2
-    CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
-    R2_ACCESS_KEY_ID: z.string().optional(),
-    R2_SECRET_ACCESS_KEY: z.string().optional(),
-    R2_BUCKET_URL: z.string().optional(),
-    R2_STORAGE_BASE_URL: z.string().optional(),
-    R2_PUBLIC_BUCKET: z.string().optional(),
-    R2_PRIVATE_BUCKET: z.string().optional(),
+    // Supabase Storage (image hosting)
+    SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+    SUPABASE_STORAGE_BUCKET: z.string().default('media'),
 
     // Optional: Email providers
     EMAIL_PROVIDER: z
@@ -78,6 +73,8 @@ export const env = createEnv({
 
   client: {
     NEXT_PUBLIC_APP_URL: z.string().default('http://localhost:3000'),
+    NEXT_PUBLIC_SUPABASE_URL: z.string().optional(),
+    NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET: z.string().default('media'),
     // Lemon Squeezy product IDs (public)
     NEXT_PUBLIC_LEMONSQUEEZY_PRODUCT_STARTER_MONTHLY: z.string().optional(),
     NEXT_PUBLIC_LEMONSQUEEZY_PRODUCT_PRO_MONTHLY: z.string().optional(),
@@ -114,13 +111,9 @@ export const env = createEnv({
     BILLING_ENABLED: process.env.BILLING_ENABLED,
     EMAIL_VERIFICATION_ENABLED: process.env.EMAIL_VERIFICATION_ENABLED,
     SENTRY_DSN: process.env.SENTRY_DSN,
-    CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
-    R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
-    R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
-    R2_BUCKET_URL: process.env.R2_BUCKET_URL,
-    R2_STORAGE_BASE_URL: process.env.R2_STORAGE_BASE_URL,
-    R2_PUBLIC_BUCKET: process.env.R2_PUBLIC_BUCKET,
-    R2_PRIVATE_BUCKET: process.env.R2_PRIVATE_BUCKET,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    SUPABASE_STORAGE_BUCKET: process.env.SUPABASE_STORAGE_BUCKET,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_DOMAIN: process.env.RESEND_DOMAIN,
     EMAIL_PROVIDER: process.env.EMAIL_PROVIDER,
@@ -158,6 +151,7 @@ export const env = createEnv({
     LEMONSQUEEZY_STORE_ID: process.env.LEMONSQUEEZY_STORE_ID,
     LEMONSQUEEZY_WEBHOOK_SECRET: process.env.LEMONSQUEEZY_WEBHOOK_SECRET,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET,
     NEXT_PUBLIC_LEMONSQUEEZY_PRODUCT_STARTER_MONTHLY:
       process.env.NEXT_PUBLIC_LEMONSQUEEZY_PRODUCT_STARTER_MONTHLY,
     NEXT_PUBLIC_LEMONSQUEEZY_PRODUCT_PRO_MONTHLY:

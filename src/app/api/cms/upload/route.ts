@@ -28,13 +28,15 @@ export async function POST(req: Request) {
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
   const key = `cms/${crypto.randomUUID()}.${ext || 'jpg'}`
 
+  let url: string
   try {
-    await storage.upload({
+    const result = await storage.upload({
       key,
       body: file,
       opts: { contentType: file.type },
       bucket: 'public',
     })
+    url = result.url
   } catch {
     return apiError(
       'storage_unavailable',
@@ -43,5 +45,5 @@ export async function POST(req: Request) {
     )
   }
 
-  return apiSuccess({ key })
+  return apiSuccess({ key, url })
 }

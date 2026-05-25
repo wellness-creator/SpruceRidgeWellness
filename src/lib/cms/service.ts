@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { env } from '@/config/env'
+import { publicStorageUrl } from '@/lib/storage'
 import { cmsRepository, type PageFieldRow } from './repository'
 import {
   COLLECTIONS,
@@ -36,7 +37,7 @@ function resolveField(row: PageFieldRow | undefined, def: FieldDef): string {
 function publicImageUrl(value: string): string {
   if (!value) return ''
   if (value.startsWith('/') || value.startsWith('http')) return value
-  return env.R2_BUCKET_URL ? `${env.R2_BUCKET_URL}/${value}` : value
+  return publicStorageUrl(value)
 }
 
 function splitLines(value: string): string[] {

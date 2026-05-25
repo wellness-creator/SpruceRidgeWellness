@@ -47,3 +47,6 @@ opencode.json
 /migrations
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Local DB snapshots (rollback fixtures, not for sharing)
+scripts/fixtures/
